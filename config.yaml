@@ -1,0 +1,13 @@
+# Alertmanager webhook url: /api/v1/alert
+# Reload this config GET request: /-/reload
+server:
+  port: 10000 # required
+signal:
+  number: 23456 # required
+  recipients: # required
+  - 67890
+  send: http://127.0.0.1:10001/v2/send # required
+  ignoreLabels: # optional
+  - alertname
+  ignoreAnnotations: [] # optional
+  generatorURL: true # optional (default false)
