@@ -35,34 +35,6 @@ signal.ignoreLabels | ["alertname"] | Name of label(s) not to include in the sig
 signal.ignoreAnnotations | ["message"] | Name of annotation(s) not to include in the signal message | no
 signal.generatorURL | true | include prometheus generator link in signal message | no
 
-Example run command:
-
-```Makefile
-REGISTRY=registry.gitlab.com
-IMAGE=schlauerlauer/alertmanager-webhook-signal
-RUNTIME=$(shell which docker or podman 2> /dev/null)
-NAME=alertmanager-signal
-PORT=10000
-
-pull:
-  $(RUNTIME) pull $(REGISTRY)/$(IMAGE)
-run:
-  $(RUNTIME) run -d --name $(NAME) \
-    -v $(CURDIR)/config.yaml:/config.yaml:ro \
-    -p $(PORT):10000 \
-    $(REGISTRY)/$(IMAGE)
-logs:
-  $(RUNTIME) logs -f --tail 100 $(NAME)
-stop:
-  $(RUNTIME) stop $(NAME)
-rm:
-  $(RUNTIME) container rm $(NAME)
-rmi:
-  $(RUNTIME) rmi $(REGISTRY)/$(IMAGE)
-rebuild: stop rm run
-restart: stop start
-start:
-  $(RUNTIME) start $(NAME)
-```
-
-`make run logs`
+> Example run command:
+>
+> `make pull run logs`
