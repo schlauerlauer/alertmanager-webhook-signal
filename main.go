@@ -99,6 +99,7 @@ func checkConfig() {
 }
 
 func handleRequests() {
+	fmt.Println("Starting server. Listening on port", cfg.Server.Port)
     router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api/v1/alert", alertReceived).Methods("POST")
 	router.HandleFunc("/-/reload", reloadConfig).Methods("GET")
