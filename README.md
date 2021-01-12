@@ -1,5 +1,7 @@
 # Alertmanager Webhook Signal
 
+> Beta
+
 This project creates a little (dockerized) REST API Endpoint for an [Alertmanager webhook receiver](https://prometheus.io/docs/alerting/latest/configuration/#webhook_config)
 and maps it to the [dockerized signal-cli](https://github.com/bbernhard/signal-cli-rest-api).
 
