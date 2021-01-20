@@ -9,7 +9,7 @@ pull:
 	$(RUNTIME) pull $(REGISTRY)/$(IMAGE)
 run:
 	$(RUNTIME) run -d --name $(NAME) \
-    		-v $(CURDIR)/config.yaml:/config.yaml:z \
+    		-v $(CURDIR)/config.yaml:/root/config.yaml:ro \
     		-p $(PORT):10000 \
     		$(REGISTRY)/$(IMAGE)
 logs:

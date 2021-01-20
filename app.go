@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"os"
 	"gopkg.in/yaml.v2"
+	"time"
 )
 
 type Config struct {
@@ -23,6 +24,7 @@ type Config struct {
 	} `yaml:"signal"`
 	Server struct {
 		Port string `yaml:"port"`
+		Timeout time.Duration `yaml:"timeout"`
 	}
 }
 
@@ -153,7 +155,7 @@ func sendSignal(m SignalMessage) {
 	payloadBuf := new(bytes.Buffer)
 	json.NewEncoder(payloadBuf).Encode(m)
 	req, _ := http.NewRequest("POST", cfg.Signal.Send, payloadBuf)
-	client := &http.Client{}
+	client := &http.Client{Timeout: cfg.Server.Timeout,}
 	res, e := client.Do(req)
 	if e != nil {
 		fmt.Println(e)

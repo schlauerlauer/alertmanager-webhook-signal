@@ -2,6 +2,7 @@
 # Reload this config GET request: /-/reload
 server:
   port: 10000 # required
+  timeout: 5s # required
 signal:
   number: 23456 # required
   recipients: # required
