@@ -1,5 +1,5 @@
 REGISTRY=registry.gitlab.com
-IMAGE=schlauerlauer/alertmanager-webhook-signal
+IMAGE=schlauerlauer/alertmanager-webhook-signal:latest
 RUNTIME=$(shell which docker or podman 2> /dev/null)
 NAME=alertmanager-signal
 PORT=10000
@@ -27,8 +27,6 @@ start:
 
 # BUILD
 build-all: go-main go-signal build-image
-go-certs:
-	cp /etc/ssl/certs/ca-certificates.crt $(CURDIR)
 go-main:
 	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./src
 go-signal:
@@ -39,11 +37,3 @@ build-image:
 # TEST
 test:
 	curl -i -X POST -H "Content-Type: application/json" -d "$(CURDIR)/tests/alert.json" http://127.0.0.1:10000/api/v1/alert
-
-# REGISTRY
-login:
-	$(RUNTIME) login $(REGISTRY)
-logout:
-	$(RUNTIME) logout $(REGISTRY)
-push:
-	$(RUNTIME) push $(REGISTRY)/$(IMAGE)
