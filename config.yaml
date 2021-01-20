@@ -6,7 +6,7 @@ signal:
   number: 23456 # required
   recipients: # required
   - 67890
-  send: http://127.0.0.1:10001/v2/send # required
+  send: http://10.88.0.1:10001/v2/send # required
   ignoreLabels: # optional
   - alertname
   ignoreAnnotations: [] # optional

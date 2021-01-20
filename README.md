@@ -1,5 +1,7 @@
 # Alertmanager Webhook Signal
 
+> Beta
+
 This project creates a little (dockerized) REST API Endpoint for an [Alertmanager webhook receiver](https://prometheus.io/docs/alerting/latest/configuration/#webhook_config)
 and maps it to the [dockerized signal-cli](https://github.com/bbernhard/signal-cli-rest-api).
 
@@ -34,3 +36,7 @@ signal.send | http://10.88.0.1:10001/v2/send | http endpoint of the [signal cli]
 signal.ignoreLabels | ["alertname"] | Name of label(s) not to include in the signal message | no
 signal.ignoreAnnotations | ["message"] | Name of annotation(s) not to include in the signal message | no
 signal.generatorURL | true | include prometheus generator link in signal message | no
+
+> Example run command:
+>
+> `make pull run logs`
