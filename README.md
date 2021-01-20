@@ -1,11 +1,36 @@
-# Alertmanager Webhook Signal
-
-> Beta
+# Alertmanager Webhook Signal [![pipeline status](https://gitlab.com/schlauerlauer/alertmanager-webhook-signal/badges/main/pipeline.svg)](https://gitlab.com/schlauerlauer/alertmanager-webhook-signal/-/commits/main)
 
 This project creates a little (dockerized) REST API Endpoint for an [Alertmanager webhook receiver](https://prometheus.io/docs/alerting/latest/configuration/#webhook_config)
 and maps it to the [dockerized signal-cli](https://github.com/bbernhard/signal-cli-rest-api).
 
 This is useful if you already have the [signal-cli from bbernhard](https://github.com/bbernhard/signal-cli-rest-api) running as a [Home-Assistant notifier](https://www.home-assistant.io/integrations/signal_messenger/) for example.
+
+## Run container
+
+```bash
+podman run -d --rm --name $(NAME) \
+  -p 10000:10000 \
+  registry.gitlab.com/schlauerlauer/alertmanager-webhook-signal:latest
+```
+
+### Test webhook
+
+```bash
+curl -X POST localhost:10000/api/v1/alert -d '{
+    "alerts": [
+        {
+            "status": "firing",
+            "labels": {
+                "alertname": "test"
+            },
+            "annotations": {
+                "message": "Test alert."
+            }
+        }
+    ]
+}
+'
+```
 
 ## Configuration
 
