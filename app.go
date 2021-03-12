@@ -15,16 +15,16 @@ import (
 
 type Config struct {
 	Signal struct {
-		Number            string   `yaml:"number"`
-		Recipients        []string `yaml:"recipients"`
-		Send              string   `yaml:"send"`
-		IgnoreLabels      []string `yaml:"ignoreLabels"`
-		IgnoreAnnotations []string `yaml:"ignoreAnnotations"`
-		GeneratorURL      bool     `yaml:"generatorURL"`
+		Number				string		`yaml:"number"`
+		Recipients			[]string	`yaml:"recipients"`
+		Send				string		`yaml:"send"`
+		IgnoreLabels		[]string	`yaml:"ignoreLabels"`
+		IgnoreAnnotations	[]string	`yaml:"ignoreAnnotations"`
+		GeneratorURL		bool		`yaml:"generatorURL"`
 	} `yaml:"signal"`
 	Server struct {
-		Port    string        `yaml:"port"`
-		Timeout time.Duration `yaml:"timeout"`
+		Port	string			`yaml:"port"`
+		Timeout	time.Duration	`yaml:"timeout"`
 	}
 	Recipients map[string]interface{} `yaml:"recipients"`
 }
@@ -64,12 +64,12 @@ type Alertmanager struct {
 }
 
 type AMAlert struct {
-	Status				string                 	`json:"status"`
-	Labels				map[string]interface{} 	`json:"labels"`
-	Annotations			map[string]interface{} 	`json:"annotations"`
-	StartsAt			string                 	`json:"startsAt"`
-	EndsAt				string                 	`json:"endsAt"`
-	GeneratorURL		string                 	`json:"generatorURL"`
+	Status				string					`json:"status"`
+	Labels				map[string]interface{}	`json:"labels"`
+	Annotations			map[string]interface{}	`json:"annotations"`
+	StartsAt			string					`json:"startsAt"`
+	EndsAt				string					`json:"endsAt"`
+	GeneratorURL		string					`json:"generatorURL"`
 }
 
 type GrafanaAlert struct {
@@ -94,10 +94,10 @@ type GrafanaMatches struct {
 }
 
 type SignalMessage struct {
-	Attachments []string `json:"base64_attachments"`
-	Message     string   `json:"message"`
-	Number      string   `json:"number"`
-	Recipients  []string `json:"recipients"`
+	Attachments	[]string	`json:"base64_attachments"`
+	Message		string		`json:"message"`
+	Number		string		`json:"number"`
+	Recipients	[]string	`json:"recipients"`
 }
 
 var cfg, _ = NewConfig("./config.yaml")
