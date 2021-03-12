@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"encoding/base64"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
@@ -162,7 +163,16 @@ func receive(c *gin.Context) {
 }
 
 func mapGrafana2Signal(ga GrafanaAlert, c *gin.Context) {
-	signal := SignalMessage{Message: ga.Message, Number: cfg.Signal.Number, Recipients: cfg.Signal.Recipients}
+	var encoded string
+	if ga.ImageUrl != "" {
+		encoded = getImage(ga.ImageUrl, c)
+	}
+	signal := SignalMessage{
+		Message: ga.Message,
+		Number: cfg.Signal.Number,
+		Recipients: cfg.Signal.Recipients,
+		Attachments: []string{encoded,},
+	}
 	sendSignal(signal, c)
 }
 
@@ -221,4 +231,19 @@ func sendSignal(m SignalMessage, c *gin.Context) {
 	}
 	defer res.Body.Close()
 	fmt.Println("signal response:", res.Status)
+}
+
+func getImage(url string, c *gin.Context) string {
+	resp, e := http.Get(url)
+	if e != nil {
+		c.String(http.StatusInternalServerError, "could not download grafana image.")
+		return ""
+	}
+	defer resp.Body.Close()
+	b, e := ioutil.ReadAll(resp.Body)
+	if e != nil {
+		c.String(http.StatusInternalServerError, "could not download grafana image.")
+		return ""
+	}
+	return base64.StdEncoding.EncodeToString(b)
 }
