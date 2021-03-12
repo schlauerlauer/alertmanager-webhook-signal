@@ -5,10 +5,13 @@ server:
   timeout: 5s # required
 signal:
   number: 23456 # required
-  recipients: # required
-  - 67890
+  recipients: # required (default recipient, if anntations - recipients is not set in alert)
+  - 123123123
   send: http://10.88.0.1:10001/v2/send # required
   ignoreLabels: # optional
   - alertname
   ignoreAnnotations: [] # optional
   generatorURL: true # optional (default false)
+recipients: # optional list of recipient names and numbers for label matching
+  name1: "123123123"
+  name2: "123123123"
