@@ -23,7 +23,7 @@ var Signals []Signal
 func main() {
 	fmt.Println("Starting signal server for testing. Listening on port", port)
 	Signals = []Signal{
-		Signal{Message: "", Number: "", Recipients: []string{"recipients"}},
+		{Message: "", Number: "", Recipients: []string{"recipients"}},
 	}
 	handleRequests()
 }
@@ -38,5 +38,5 @@ func receiveMessage(w http.ResponseWriter, r *http.Request) {
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var Signal Signal
 	json.Unmarshal(reqBody, &Signal)
-	fmt.Println(Signal.Message)
+	fmt.Println(Signal.Message, Signal.Recipients, Signal.Attachments)
 }
