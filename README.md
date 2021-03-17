@@ -62,6 +62,21 @@ recipients: # optional list of recipient names and numbers for label matching
   name2: "123123123"
 ```
 
+Example PrometheusRule:
+
+```yaml
+groups:
+- name: test.rules
+  rules:
+  - alert: Watchdog
+    annotations:
+      message: 'Testalert'
+    labels:
+      recipients: name1
+    expr: 'vector(1)'
+    for: 1m
+```
+
 Entry | Example | Explanation | Required
 -|-|-|-
 server.port | 10000 | Port the script should listen on | yes
