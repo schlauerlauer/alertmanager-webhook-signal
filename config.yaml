@@ -1,5 +1,6 @@
-# Alertmanager webhook url: /api/v1/alert
-# Reload this config GET request: /-/reload
+# Alertmanager webhook url: /api/v2/alertmanager
+# Signal webhook url: /api/v2/signal
+# Reload this config with a GET request on: /-/reload
 server:
   port: 10000 # required
   timeout: 5s # required
