@@ -5,7 +5,11 @@ and maps it to the [dockerized signal-cli](https://github.com/bbernhard/signal-c
 
 This is useful if you already have the [signal-cli from bbernhard](https://github.com/bbernhard/signal-cli-rest-api) running as a [Home-Assistant notifier](https://www.home-assistant.io/integrations/signal_messenger/) for example.
 
-![screenshot](media/signal.jpg)
+It now supports alert webhooks from Grafana aswell, including a preview graph image!
+
+![grafana](media/grafana.png)
+
+![alertmanager](media/alertmanager.jpg)
 
 ## Run container
 
@@ -53,6 +57,9 @@ signal:
   - alertname
   ignoreAnnotations: [] # optional (default [])
   generatorURL: true # optional (default false)
+recipients: # optional list of recipient names and numbers for label matching
+  name1: "123123123"
+  name2: "123123123"
 ```
 
 Entry | Example | Explanation | Required
