@@ -53,6 +53,7 @@ signal:
   recipients: # required
   - 67890
   send: http://10.88.0.1:10001/v2/send # required
+alertmanager:
   ignoreLabels: # optional (default [])
   - alertname
   ignoreAnnotations: [] # optional (default [])
