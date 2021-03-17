@@ -22,7 +22,6 @@ type Config struct {
 		} `yaml:"signal"`
 		Server struct {
 			Port	string			`yaml:"port"`
-			Timeout	time.Duration	`yaml:"timeout"`
 		}
 		AMConfig struct {			
 			IgnoreLabels		[]string	`yaml:"ignoreLabels"`
