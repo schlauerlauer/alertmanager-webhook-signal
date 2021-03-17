@@ -8,7 +8,8 @@
                 "alertname": "node_down"
             },
             "annotations": {
-                "message": "testhost.local:9100 of job node has been down for more than 5 minutes."
+                "message": "testhost.local:9100 of job node has been down for more than 5 minutes.",
+                "recipients": "janek"
             },
             "startsAt": "2016-04-21T20:14:37.698Z",
             "endsAt": "2016-04-21T20:15:37.698Z",

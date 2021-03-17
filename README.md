@@ -47,7 +47,6 @@ Example configuration:
 ```yaml
 server:
   port: 10000 # required
-  timeout: 5s # required
 signal:
   number: 23456 # required
   recipients: # required
@@ -66,7 +65,6 @@ recipients: # optional list of recipient names and numbers for label matching
 Entry | Example | Explanation | Required
 -|-|-|-
 server.port | 10000 | Port the script should listen on | yes
-server.timeout | 5s | Webhook request timeout | yes
 signal.number | "+4912345678901" | Phone number of signal cli sender | yes
 signal.recipients | ["+4923456789012"] | Phone number(s) of the recipients | yes
 signal.send | "http://10.88.0.1:10001/v2/send" | http endpoint of the [signal cli](https://github.com/bbernhard/signal-cli-rest-api) | yes
