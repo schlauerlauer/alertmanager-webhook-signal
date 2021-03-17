@@ -8,6 +8,7 @@ signal:
   recipients: # required (default recipient, if anntations - recipients is not set in alert)
   - 123123123
   send: http://10.88.0.1:10001/v2/send # required
+alertmanager:
   ignoreLabels: # optional
   - alertname
   ignoreAnnotations: [] # optional

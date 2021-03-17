@@ -19,13 +19,15 @@ type Config struct {
 		Number				string		`yaml:"number"`
 		Recipients			[]string	`yaml:"recipients"`
 		Send				string		`yaml:"send"`
-		IgnoreLabels		[]string	`yaml:"ignoreLabels"`
-		IgnoreAnnotations	[]string	`yaml:"ignoreAnnotations"`
-		GeneratorURL		bool		`yaml:"generatorURL"`
-	} `yaml:"signal"`
-	Server struct {
-		Port	string			`yaml:"port"`
-		Timeout	time.Duration	`yaml:"timeout"`
+		} `yaml:"signal"`
+		Server struct {
+			Port	string			`yaml:"port"`
+			Timeout	time.Duration	`yaml:"timeout"`
+		}
+		AMConfig struct {			
+			IgnoreLabels		[]string	`yaml:"ignoreLabels"`
+			IgnoreAnnotations	[]string	`yaml:"ignoreAnnotations"`
+			GeneratorURL		bool		`yaml:"generatorURL"`
 	}
 	Recipients map[string]interface{} `yaml:"recipients"`
 }
@@ -182,7 +184,7 @@ func mapAM2Signal(a Alertmanager, c *gin.Context) {
 		recipientName := "default"
 		message := "Alert " + fmt.Sprint(element.Labels["alertname"]) + " is " + element.Status
 		for k, v := range element.Annotations {
-			if !stringInSlice(k, cfg.Signal.IgnoreAnnotations) {
+			if !stringInSlice(k, cfg.AMConfig.IgnoreAnnotations) {
 				message += fmt.Sprintf("\n%v: %v", k, v)
 			}
 			if k == "recipients" {
@@ -197,11 +199,11 @@ func mapAM2Signal(a Alertmanager, c *gin.Context) {
 			}
 		}
 		for k, v := range element.Labels {
-			if !stringInSlice(k, cfg.Signal.IgnoreLabels) {
+			if !stringInSlice(k, cfg.AMConfig.IgnoreLabels) {
 				message += fmt.Sprintf("\n%v: %v", k, v)
 			}
 		}
-		if cfg.Signal.GeneratorURL {
+		if cfg.AMConfig.GeneratorURL {
 			message += fmt.Sprintf("\nuri: %v", element.GeneratorURL)
 		}
 		signal := SignalMessage{Message: message, Number: cfg.Signal.Number, Recipients: recipients}
