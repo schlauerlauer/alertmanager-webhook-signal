@@ -11,7 +11,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 )
 
 type Config struct {
