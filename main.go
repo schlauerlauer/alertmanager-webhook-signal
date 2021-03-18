@@ -15,19 +15,19 @@ import (
 
 type Config struct {
 	Signal struct {
-		Number				string		`yaml:"number"`
-		Recipients			[]string	`yaml:"recipients"`
-		Send				string		`yaml:"send"`
-		} `yaml:"signal"`
-		Server struct {
-			Port	string			`yaml:"port"`
-		}
-		AMConfig struct {			
-			IgnoreLabels		[]string	`yaml:"ignoreLabels"`
-			IgnoreAnnotations	[]string	`yaml:"ignoreAnnotations"`
-			GeneratorURL		bool		`yaml:"generatorURL"`
-	}
-	Recipients map[string]interface{} `yaml:"recipients"`
+		Number				string					`yaml:"number"`
+		Recipients			[]string				`yaml:"recipients"`
+		Send				string					`yaml:"send"`
+	} `yaml:"signal"`
+	Server struct {
+		Port				string					`yaml:"port"`
+	} `yaml:"server"`
+	AMConfig struct {
+		IgnoreLabels		[]string				`yaml:"ignoreLabels"`
+		IgnoreAnnotations	[]string				`yaml:"ignoreAnnotations"`
+		GeneratorURL		bool					`yaml:"generatorURL"`
+	} `yaml:"alertmanager"`
+	Recipients				map[string]interface{}	`yaml:"recipients"`
 }
 
 func NewConfig(configPath string) (*Config, error) {
@@ -95,10 +95,10 @@ type GrafanaMatches struct {
 }
 
 type SignalMessage struct {
-	Attachments	[]string	`json:"base64_attachments"`
-	Message		string		`json:"message"`
-	Number		string		`json:"number"`
-	Recipients	[]string	`json:"recipients"`
+	Attachments			[]string				`json:"base64_attachments"`
+	Message				string					`json:"message"`
+	Number				string					`json:"number"`
+	Recipients			[]string				`json:"recipients"`
 }
 
 var cfg, _ = NewConfig("./config.yaml")
@@ -167,8 +167,9 @@ func mapGrafana2Signal(ga GrafanaAlert, c *gin.Context) {
 	if ga.ImageUrl != "" {
 		encoded = getImage(ga.ImageUrl, c)
 	}
+	message := ga.Title + "\n" + ga.RuleName + "\n" + ga.Message + "\n" + ga.RuleUrl
 	signal := SignalMessage{
-		Message: ga.Message,
+		Message: message,
 		Number: cfg.Signal.Number,
 		Recipients: cfg.Signal.Recipients,
 		Attachments: []string{encoded,},
@@ -179,20 +180,17 @@ func mapGrafana2Signal(ga GrafanaAlert, c *gin.Context) {
 func mapAM2Signal(a Alertmanager, c *gin.Context) {
 	for _, element := range a.Alerts {
 		recipients := cfg.Signal.Recipients
-		recipientName := "default"
 		message := "Alert " + fmt.Sprint(element.Labels["alertname"]) + " is " + element.Status
 		for k, v := range element.Annotations {
 			if !stringInSlice(k, cfg.AMConfig.IgnoreAnnotations) {
 				message += fmt.Sprintf("\n%v: %v", k, v)
 			}
 			if k == "recipients" {
-				for r := range cfg.Recipients {
-					if v == r {
-						var _newRec string = fmt.Sprintf("%v", cfg.Recipients[v.(string)])
-						recipients = nil
-						recipients = append(recipients, _newRec)
-						recipientName = r
-					}
+				newReceiver := mapReceiver(v.(string))
+				fmt.Println(newReceiver)
+				if newReceiver != "" {
+					recipients = nil
+					recipients = append(recipients, newReceiver)
 				}
 			}
 		}
@@ -204,10 +202,22 @@ func mapAM2Signal(a Alertmanager, c *gin.Context) {
 		if cfg.AMConfig.GeneratorURL {
 			message += fmt.Sprintf("\nuri: %v", element.GeneratorURL)
 		}
-		signal := SignalMessage{Message: message, Number: cfg.Signal.Number, Recipients: recipients}
-		fmt.Println("Sending alert:", element.Labels["alertname"], "to recipient:", recipientName)
+		signal := SignalMessage{
+			Message: message,
+			Number: cfg.Signal.Number,
+			Recipients: recipients,
+		}
 		sendSignal(signal, c)
 	}
+}
+
+func mapReceiver(receiver string) string {
+	for r := range cfg.Recipients {
+		if r == receiver {
+			return fmt.Sprintf("%v", cfg.Recipients[receiver])
+		}
+	}
+	return ""
 }
 
 func stringInSlice(a string, list []string) bool {
