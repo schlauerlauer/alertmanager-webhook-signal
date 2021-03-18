@@ -59,7 +59,7 @@ alertmanager:
   generatorURL: true # optional (default false)
 recipients: # optional list of recipient names and numbers for label matching
   name1: "123123123"
-  name2: "123123123"
+  name2: "234234234"
 ```
 
 Example PrometheusRule:
