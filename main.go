@@ -167,7 +167,12 @@ func mapGrafana2Signal(ga GrafanaAlert, c *gin.Context) {
 	if ga.ImageUrl != "" {
 		encoded = getImage(ga.ImageUrl, c)
 	}
-	message := ga.Title + "\n" + ga.RuleName + "\n" + ga.Message + "\n" + ga.RuleUrl
+	message := fmt.Sprintf("%s\n%s\n%s\n%s",
+		ga.Title,
+		ga.RuleName,
+		ga.Message,
+		ga.RuleUrl,
+	)
 	signal := SignalMessage{
 		Message: message,
 		Number: cfg.Signal.Number,
