@@ -103,7 +103,7 @@ type SignalMessage struct {
 
 var cfg, _ = NewConfig("./config.yaml")
 
-func checkConfig() {
+func init() {
 	if cfg.Server.Port == "" {
 		log.Fatal("Server port not set.")
 	}
@@ -119,7 +119,6 @@ func checkConfig() {
 }
 
 func main() {
-	checkConfig()
 	gin.SetMode(gin.ReleaseMode)
 	fmt.Println("Starting server. Listening on port:", cfg.Server.Port)
 	r := gin.Default()
