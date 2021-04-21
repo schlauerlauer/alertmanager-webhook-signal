@@ -21,6 +21,7 @@ type Config struct {
 	} `yaml:"signal"`
 	Server struct {
 		Port				string					`yaml:"port"`
+		Debug				bool					`yaml:"debug"`
 	} `yaml:"server"`
 	AMConfig struct {
 		IgnoreLabels		[]string				`yaml:"ignoreLabels"`
@@ -177,6 +178,9 @@ func mapGrafana2Signal(ga GrafanaAlert, c *gin.Context) {
 		Number: cfg.Signal.Number,
 		Recipients: cfg.Signal.Recipients,
 		Attachments: []string{encoded,},
+	}
+	if cfg.Server.Debug {
+		fmt.Println(signal)
 	}
 	sendSignal(signal, c)
 }
