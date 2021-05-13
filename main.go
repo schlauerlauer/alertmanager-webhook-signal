@@ -27,7 +27,7 @@ type Config struct {
 		IgnoreLabels		[]string				`yaml:"ignoreLabels"`
 		IgnoreAnnotations	[]string				`yaml:"ignoreAnnotations"`
 		GeneratorURL		bool					`yaml:"generatorURL"`
-		MatchLabel			string					`yaml:"matchLabels`
+		MatchLabel			string					`yaml:"matchLabel`
 	} `yaml:"alertmanager"`
 	Recipients				map[string]interface{}	`yaml:"recipients"`
 }
