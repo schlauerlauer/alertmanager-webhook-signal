@@ -27,6 +27,7 @@ type Config struct {
 		IgnoreLabels		[]string				`yaml:"ignoreLabels"`
 		IgnoreAnnotations	[]string				`yaml:"ignoreAnnotations"`
 		GeneratorURL		bool					`yaml:"generatorURL"`
+		MatchLabel			string					`yaml:"matchLabels`
 	} `yaml:"alertmanager"`
 	Recipients				map[string]interface{}	`yaml:"recipients"`
 }
@@ -124,17 +125,14 @@ func main() {
 	fmt.Println("Starting server. Listening on port:", cfg.Server.Port)
 	r := gin.Default()
 	r.GET("/-/reload", reload)
-	r.POST("/api/v2/:provider", receive)
+	r.POST("/api/v3/:provider", receive)
+	r.POST("/api/v2/:provider", receiveDeprecated)
 	r.POST("/api/v1/alert", deprecated)
 	r.Run(":"+cfg.Server.Port)
 }
 
 func deprecated(c *gin.Context) {
-	b, _ := ioutil.ReadAll(c.Request.Body)
-	var alert Alertmanager
-	json.Unmarshal(b, &alert)
-	c.String(http.StatusOK, "This api version is deprecated. Please use /api/v2/alertmanager instead.")
-	mapAM2Signal(alert, c)
+	c.String(http.StatusOK, "This api version is deprecated. Please use /api/v3/alertmanager instead.")
 }
 
 func reload(c *gin.Context) {
@@ -142,6 +140,23 @@ func reload(c *gin.Context) {
 	cfg, err = NewConfig("./config.yaml")
 	if err != nil {
 		fmt.Println(err)
+	}
+}
+
+func receiveDeprecated(c *gin.Context) {
+	b, _ := ioutil.ReadAll(c.Request.Body)
+	switch c.Param("provider") {
+	case "alertmanager":
+		var alert Alertmanager
+		json.Unmarshal(b, &alert)
+		mapAM2SignalDeprecated(alert, c)
+	case "grafana":
+		var alert GrafanaAlert
+		json.Unmarshal(b, &alert)
+		mapGrafana2Signal(alert, c)
+	default:
+		c.String(http.StatusNotFound, "provider not available")
+		return
 	}
 }
 
@@ -179,13 +194,10 @@ func mapGrafana2Signal(ga GrafanaAlert, c *gin.Context) {
 		Recipients: cfg.Signal.Recipients,
 		Attachments: []string{encoded,},
 	}
-	if cfg.Server.Debug {
-		fmt.Println(signal)
-	}
 	sendSignal(signal, c)
 }
 
-func mapAM2Signal(a Alertmanager, c *gin.Context) {
+func mapAM2SignalDeprecated(a Alertmanager, c *gin.Context) {
 	for _, element := range a.Alerts {
 		recipients := cfg.Signal.Recipients
 		message := "Alert " + fmt.Sprint(element.Labels["alertname"]) + " is " + element.Status
@@ -214,6 +226,42 @@ func mapAM2Signal(a Alertmanager, c *gin.Context) {
 			Message: message,
 			Number: cfg.Signal.Number,
 			Recipients: recipients,
+			Attachments: []string{},
+		}
+		sendSignal(signal, c)
+	}
+}
+
+func mapAM2Signal(a Alertmanager, c *gin.Context) {
+	for _, element := range a.Alerts {
+		recipients := cfg.Signal.Recipients
+		message := "Alert " + fmt.Sprint(element.Labels["alertname"]) + " is " + element.Status
+		for k, v := range element.Annotations {
+			if !stringInSlice(k, cfg.AMConfig.IgnoreAnnotations) {
+				message += fmt.Sprintf("\n%v: %v", k, v)
+			}
+		}
+		for k, v := range element.Labels {
+			if !stringInSlice(k, cfg.AMConfig.IgnoreLabels) {
+				message += fmt.Sprintf("\n%v: %v", k, v)
+			}
+			if k == "recipients" {
+				newReceiver := mapReceiver(v.(string))
+				fmt.Println(newReceiver)
+				if newReceiver != "" {
+					recipients = nil
+					recipients = append(recipients, newReceiver)
+				}
+			}
+		}
+		if cfg.AMConfig.GeneratorURL {
+			message += fmt.Sprintf("\nuri: %v", element.GeneratorURL)
+		}
+		signal := SignalMessage{
+			Message: message,
+			Number: cfg.Signal.Number,
+			Recipients: recipients,
+			Attachments: []string{},
 		}
 		sendSignal(signal, c)
 	}
@@ -240,6 +288,9 @@ func stringInSlice(a string, list []string) bool {
 func sendSignal(m SignalMessage, c *gin.Context) {
 	payloadBuf := new(bytes.Buffer)
 	json.NewEncoder(payloadBuf).Encode(m)
+	if cfg.Server.Debug {
+		fmt.Println(payloadBuf)
+	}
 	req, _ := http.NewRequest("POST", cfg.Signal.Send, payloadBuf)
 	client := &http.Client{}
 	res, e := client.Do(req)
