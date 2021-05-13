@@ -47,6 +47,7 @@ Example configuration:
 ```yaml
 server:
   port: 10000 # required
+  debug: false
 signal:
   number: 23456 # required
   recipients: # required
@@ -57,6 +58,7 @@ alertmanager:
   - alertname
   ignoreAnnotations: [] # optional (default [])
   generatorURL: true # optional (default false)
+  matchLabel: recipients
 recipients: # optional list of recipient names and numbers for label matching
   name1: "123123123"
   name2: "234234234"
@@ -75,6 +77,23 @@ groups:
       recipients: name1
     expr: 'vector(1)'
     for: 1m
+```
+
+Example Alertmanager config.yml:
+
+```yaml
+global:
+route:
+  receiver: signal
+  group_by: ["alertname"]
+  group_wait: 5s
+  group_interval: 5m
+  repeat_interval: 6d
+receivers:
+- name: signal
+  webhook_configs:
+    - url: 'http://10.88.0.1:10000/api/v2/alertmanager'
+      send_resolved: true
 ```
 
 Entry | Example | Explanation | Required
