@@ -14,6 +14,7 @@ alertmanager:
   - alertname
   ignoreAnnotations: [] # optional
   generatorURL: true # optional (default false)
+  matchLabel: recipients
 recipients: # optional list of recipient names and numbers for label matching
   name1: "123123123"
   name2: "234234234"
