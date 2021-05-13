@@ -245,7 +245,7 @@ func mapAM2Signal(a Alertmanager, c *gin.Context) {
 			if !stringInSlice(k, cfg.AMConfig.IgnoreLabels) {
 				message += fmt.Sprintf("\n%v: %v", k, v)
 			}
-			if k == cfg.AMConfig.MatchLabel {
+			if k == "recipients" {
 				newReceiver := mapReceiver(v.(string))
 				fmt.Println(newReceiver)
 				if newReceiver != "" {
