@@ -5,16 +5,19 @@ variables:
   BUILDAH_FORMAT: "docker"
 
 before_script:
-  - podman login -u $CI_USER -p $CI_TOKEN $CI_REGISTRY
+  - podman login -u $CI_USER -p $CI_TOKEN registry.gitlab.com
+  - podman login -u $GH_USER -p $GH_TOKEN docker.io
 
 build:
   stage: build
   script:
     #- podman pull $CI_REGISTRY_IMAGE:latest || true
-    #- podman build --cache-from $CI_REGISTRY_IMAGE:latest -t $CI_REGISTRY/$CI_IMAGE:$CI_COMMIT_SHA -t $CI_REGISTRY/$CI_IMAGE:latest .
-    - podman build -t $CI_REGISTRY/$CI_IMAGE:$CI_COMMIT_SHA -t $CI_REGISTRY/$CI_IMAGE:latest .
-    - podman push -q $CI_REGISTRY/$CI_IMAGE:$CI_COMMIT_SHA
-    - podman push -q $CI_REGISTRY/$CI_IMAGE:latest
+    #- podman build --cache-from $CI_REGISTRY_IMAGE:latest -t registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA -t registry.gitlab.com/$CI_IMAGE:latest .
+    - podman build -t registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA -t registry.gitlab.com/$CI_IMAGE:latest -t docker.io/$CI_IMAGE:latest .
+    - podman push -q registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA
+    - podman push -q registry.gitlab.com/$CI_IMAGE:latest
+    - podman push -q docker.io/$CI_IMAGE:latest
 
 after_script:
-  - podman logout $CI_REGISTRY
+  - podman logout registry.gitlab.com
+  - podman logout docker.io
