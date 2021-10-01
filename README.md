@@ -13,11 +13,23 @@ It now supports alert webhooks from Grafana aswell, including a preview graph im
 
 ## Run container
 
+> This image get's pushed automatically to `docker.io/schlauerlauer/alertmanager-webhook-signal` and `registry.gitlab.com/schlauerlauer/alertmanager-webhook-signal`
+
+Default config
+
+```bash
+docker run -d --rm --name alertmanager-signal \
+  -p 10000:10000 \
+  docker.io/schlauerlauer/alertmanager-webhook-signal:latest
+```
+
+Custom config
+
 ```bash
 docker run -d --rm --name alertmanager-signal \
   -p 10000:10000 \
   -v $(pwd)/config.yaml:/root/config.yaml \
-  registry.gitlab.com/schlauerlauer/alertmanager-webhook-signal:latest
+  docker.io/schlauerlauer/alertmanager-webhook-signal:latest
 ```
 
 ### Test webhook
@@ -46,18 +58,21 @@ A `config.yaml` file is needed for configuration.
 Example configuration:
 
 ```yaml
+# Alertmanager webhook url: /api/v2/alertmanager
+# Signal webhook url: /api/v2/signal
+# Reload this config with a GET request on: /-/reload
 server:
   port: 10000 # required
   debug: false
 signal:
   number: 23456 # required
-  recipients: # required
-  - 67890
+  recipients: # required (default recipient, if annotations - recipients is not set in the alert)
+  - 123123123
   send: http://10.88.0.1:10001/v2/send # required
 alertmanager:
-  ignoreLabels: # optional (default [])
+  ignoreLabels: # optional (default is [])
   - alertname
-  ignoreAnnotations: [] # optional (default [])
+  ignoreAnnotations: [] # optional
   generatorURL: true # optional (default false)
   matchLabel: recipients
 recipients: # optional list of recipient names and numbers for label matching
