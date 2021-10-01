@@ -22,7 +22,7 @@ docker run -d --rm --name alertmanager-signal \
 ### Test webhook
 
 ```bash
-curl -X POST localhost:10000/api/v1/alert -d '{
+curl -X POST localhost:10000/api/v2/alertmanager -d '{
     "alerts": [
         {
             "status": "firing",
