@@ -1,4 +1,4 @@
-FROM docker.io/library/golang:1.15.7 AS builder
+FROM docker.io/library/golang:1.16.15 AS builder
 WORKDIR /go/src/gitlab.com/schlauerlauer/alertmanager-webhook-signal/
 RUN go get -d -v \
     gopkg.in/yaml.v2 \
