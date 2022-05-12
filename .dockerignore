@@ -1,0 +1,11 @@
+.gitlab-ci.yml
+Makefile
+README.md
+signal
+app
+tests/
+media/
+.gitignore
+Containerfile
+.git
+.dockerignore
