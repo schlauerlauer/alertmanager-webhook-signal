@@ -12,8 +12,8 @@ build:
   stage: build
   script:
     #- podman pull $CI_REGISTRY_IMAGE:latest || true
-    #- podman build --cache-from $CI_REGISTRY_IMAGE:latest -t registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA -t registry.gitlab.com/$CI_IMAGE:latest .
-    - podman build -t registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA -t registry.gitlab.com/$CI_IMAGE:latest -t docker.io/$CI_IMAGE:latest .
+    #- podman build -f Containerfile --cache-from $CI_REGISTRY_IMAGE:latest -t registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA -t registry.gitlab.com/$CI_IMAGE:latest .
+    - podman build -f Containerfile -t registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA -t registry.gitlab.com/$CI_IMAGE:latest -t docker.io/$CI_IMAGE:latest .
     - podman push -q registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA
     - podman push -q registry.gitlab.com/$CI_IMAGE:latest
     - podman push -q docker.io/$CI_IMAGE:$CI_COMMIT_SHA
