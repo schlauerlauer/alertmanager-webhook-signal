@@ -17,7 +17,7 @@ build:
     #- podman build -f Containerfile --cache-from $CI_REGISTRY_IMAGE:latest -t registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA -t registry.gitlab.com/$CI_IMAGE:latest .
     - echo $CI_COMMIT_TIMESTAMP
     - echo $VERSION
-    - date -d $CI_COMMIT_TIMESTAMP +%y.%m
+    - date -d "$CI_COMMIT_TIMESTAMP" +%y.%m
 
     - podman build -f Containerfile -t alertmanager-webhook-signal .
 
