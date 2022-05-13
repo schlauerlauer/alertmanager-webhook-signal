@@ -6,7 +6,8 @@ variables:
   BUILDAH_FORMAT: "docker"
 
 before_script:
-  - export VERSION=$(date -d @$(git show -s --format=%ct $CI_COMMIT_SHA) +%y.%m).$NUMBER
+  - export VERSION=$(git show -s --format=%ct $CI_COMMIT_SHA)
+  #- export VERSION=$(date -d @$(git show -s --format=%ct $CI_COMMIT_SHA) +%y.%m).$NUMBER
   - podman login -u $CI_USER -p $CI_TOKEN registry.gitlab.com
   - podman login -u $GH_USER -p $GH_TOKEN docker.io
 
