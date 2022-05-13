@@ -29,6 +29,8 @@ build:
     - buildah tag alertmanager-webhook-signal docker.io/$IMAGE:$VERSION
     - buildah push -q docker.io/$IMAGE:$VERSION
 
+    - echo "successfully pushed version $VERSION"
+
 after_script:
   - buildah logout registry.gitlab.com
   - buildah logout docker.io
