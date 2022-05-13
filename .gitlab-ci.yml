@@ -6,7 +6,7 @@ variables:
   BUILDAH_FORMAT: "docker"
 
 before_script:
-  - export VERSION=$(date -d $CI_COMMIT_TIMESTAMP +%y.%m).$NUMBER
+  - export VERSION=$(date -d $CI_COMMIT_TIMESTAMP +%y.%m)
   - podman login -u $CI_USER -p $CI_TOKEN registry.gitlab.com
   - podman login -u $GH_USER -p $GH_TOKEN docker.io
 
@@ -15,6 +15,7 @@ build:
   script:
     #- podman pull $CI_REGISTRY_IMAGE:latest || true
     #- podman build -f Containerfile --cache-from $CI_REGISTRY_IMAGE:latest -t registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA -t registry.gitlab.com/$CI_IMAGE:latest .
+    - echo $CI_COMMIT_TIMESTAMP
     - echo $VERSION
 
     - podman build -f Containerfile -t alertmanager-webhook-signal .
