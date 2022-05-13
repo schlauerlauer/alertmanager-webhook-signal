@@ -14,7 +14,7 @@ before_script:
 build:
   stage: build
   script:
-    - buildah pull $CI_REGISTRY_IMAGE:latest || true
+    - buildah pull registry.gitlab.com/$IMAGE:latest
     - buildah build -f Containerfile -t alertmanager-webhook-signal --cache-from registry.gitlab.com/$IMAGE:latest .
 
     - buildah tag alertmanager-webhook-signal registry.gitlab.com/$IMAGE:$VERSION
