@@ -7,32 +7,32 @@ variables:
 
 before_script:
   - export VERSION=$(date -d $CI_COMMIT_TIMESTAMP +%y.%m)
-  - podman login -u $CI_USER -p $CI_TOKEN registry.gitlab.com
-  - podman login -u $GH_USER -p $GH_TOKEN docker.io
+  - buildah login -u $CI_USER -p $CI_TOKEN registry.gitlab.com
+  - buildah login -u $GH_USER -p $GH_TOKEN docker.io
 
 build:
   stage: build
   script:
-    #- podman pull $CI_REGISTRY_IMAGE:latest || true
-    #- podman build -f Containerfile --cache-from $CI_REGISTRY_IMAGE:latest -t registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA -t registry.gitlab.com/$CI_IMAGE:latest .
+    #- buildah pull $CI_REGISTRY_IMAGE:latest || true
+    #- buildah build -f Containerfile --cache-from $CI_REGISTRY_IMAGE:latest -t registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA -t registry.gitlab.com/$CI_IMAGE:latest .
     - echo $CI_COMMIT_TIMESTAMP
     - echo $VERSION
     - date -d "$CI_COMMIT_TIMESTAMP" +%y.%m
 
-    - podman build -f Containerfile -t alertmanager-webhook-signal .
+    - buildah build -f Containerfile -t alertmanager-webhook-signal .
 
-    - podman tag alertmanager-webhook-signal registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA
-    - podman push -q registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA
+    - buildah tag alertmanager-webhook-signal registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA
+    - buildah push -q registry.gitlab.com/$CI_IMAGE:$CI_COMMIT_SHA
 
-    - podman tag alertmanager-webhook-signal registry.gitlab.com/$CI_IMAGE:latest
-    - podman push -q registry.gitlab.com/$CI_IMAGE:latest
+    - buildah tag alertmanager-webhook-signal registry.gitlab.com/$CI_IMAGE:latest
+    - buildah push -q registry.gitlab.com/$CI_IMAGE:latest
 
-    - podman tag alertmanager-webhook-signal docker.io/$CI_IMAGE:latest
-    - podman push -q docker.io/$CI_IMAGE:latest
+    - buildah tag alertmanager-webhook-signal docker.io/$CI_IMAGE:latest
+    - buildah push -q docker.io/$CI_IMAGE:latest
 
-    - podman tag alertmanager-webhook-signal docker.io/$CI_IMAGE:$CI_COMMIT_SHA
-    - podman push -q docker.io/$CI_IMAGE:$CI_COMMIT_SHA
+    - buildah tag alertmanager-webhook-signal docker.io/$CI_IMAGE:$CI_COMMIT_SHA
+    - buildah push -q docker.io/$CI_IMAGE:$CI_COMMIT_SHA
 
 after_script:
-  - podman logout registry.gitlab.com
-  - podman logout docker.io
+  - buildah logout registry.gitlab.com
+  - buildah logout docker.io
