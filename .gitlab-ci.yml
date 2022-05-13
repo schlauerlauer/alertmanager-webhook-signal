@@ -1,21 +1,19 @@
 image: "quay.io/containers/buildah:v1.23.3"
 
 variables:
-  NUMBER: 0
   STORAGE_DRIVER: "vfs"
   BUILDAH_FORMAT: "docker"
   IMAGE: "schlauerlauer/alertmanager-webhook-signal"
 
 before_script:
-  - export VERSION=$(date -d $CI_COMMIT_TIMESTAMP +%y.%m).$NUMBER
+  - export MICRO=$(cat MICRO.txt)
+  - export VERSION=$(date -d $CI_COMMIT_TIMESTAMP +%y.%m).$MICRO
   - buildah login -u $CI_USER -p $CI_TOKEN registry.gitlab.com
   - buildah login -u $GH_USER -p $GH_TOKEN docker.io
 
 build:
   stage: build
   script:
-    - cat MICRO.txt
-
     - buildah pull $CI_REGISTRY_IMAGE:latest || true
     - buildah build -f Containerfile -t alertmanager-webhook-signal --cache-from registry.gitlab.com/$IMAGE:latest .
 
