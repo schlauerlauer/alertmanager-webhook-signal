@@ -75,7 +75,7 @@ alertmanager:
   ignoreAnnotations: [] # optional
   generatorURL: true # optional (default false)
   matchLabel: recipients
-recipients: # optional list of recipient names and numbers for label matching
+recipients: # optional list of recipient names and numbers for annotation matching
   name1: "123123123"
   name2: "234234234"
 ```
@@ -89,7 +89,6 @@ groups:
   - alert: Watchdog
     annotations:
       message: 'Testalert'
-    labels:
       recipients: name1
     expr: 'vector(1)'
     for: 1m
