@@ -112,6 +112,7 @@ func getImage(url string, c *gin.Context) string {
 	return base64.StdEncoding.EncodeToString(b)
 }
 
+// this is using annotations instead of labels for the recipients. Please use the newer mapAM2Signal, which uses labels
 func (al *Alert) mapAM2SignalDeprecated(a dto.Alertmanager, c *gin.Context) {
 	for _, element := range a.Alerts {
 		recipients := al.config.Signal.Recipients

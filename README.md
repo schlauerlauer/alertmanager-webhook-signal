@@ -5,6 +5,8 @@ and maps it to the [dockerized signal-cli](https://github.com/bbernhard/signal-c
 
 This is useful if you already have the [signal-cli from bbernhard](https://github.com/bbernhard/signal-cli-rest-api) running as a [Home-Assistant notifier](https://www.home-assistant.io/integrations/signal_messenger/) for example.
 
+Use a prometheus label `recipients` to specify where you want the signal message to be send
+
 It now supports alert webhooks from Grafana aswell, including a preview graph image!
 
 ![grafana](media/grafana.png)
