@@ -37,7 +37,8 @@ func main() {
 
 	v3 := api.Group("v3")
 	{
-		v3.POST(":provider", alerts.ReceiveV3)
+		v3.POST("alertmanager", alerts.ReceiveAlertmanager)
+		v3.POST("grafana", alerts.ReceiveGrafana)
 	}
 
 	v2 := api.Group("v2")

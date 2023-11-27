@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,25 +30,34 @@ const (
 	ProviderAlertmanager string = "alertmanager"
 )
 
-func (al *Alert) ReceiveV3(c *gin.Context) {
-	provider := c.Param("provider")
+func (al *Alert) ReceiveAlertmanager(c *gin.Context) {
 	buff, _ := io.ReadAll(c.Request.Body)
 
-	switch provider {
-	case ProviderAlertmanager:
-		var alert dto.Alertmanager
-		json.Unmarshal(buff, &alert)
-		al.mapAM2Signal(alert, c)
-		return
-	case ProviderGrafana:
-		var alert dto.GrafanaAlert
-		json.Unmarshal(buff, &alert)
-		al.mapGrafana2Signal(alert, c)
-		return
-	default:
-		c.AbortWithError(http.StatusNotFound, errors.New("provider not available"))
+	var alert dto.Alertmanager
+	err := json.Unmarshal(buff, &alert)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, errors.New("could not unmarshal json"))
+		log.Println(err)
 		return
 	}
+
+	al.mapAM2Signal(&alert, c)
+	return
+}
+
+func (al *Alert) ReceiveGrafana(c *gin.Context) {
+	buff, _ := io.ReadAll(c.Request.Body)
+
+	var alert dto.GrafanaAlert
+	err := json.Unmarshal(buff, &alert)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, errors.New("could not unmarshal json"))
+		log.Println(err)
+		return
+	}
+
+	al.mapGrafana2Signal(alert, c)
+	return
 }
 
 func (al *Alert) ReceiveV2(c *gin.Context) {
@@ -148,7 +158,7 @@ func (al *Alert) mapAM2SignalDeprecated(a dto.Alertmanager, c *gin.Context) {
 	}
 }
 
-func (al *Alert) mapAM2Signal(a dto.Alertmanager, c *gin.Context) {
+func (al *Alert) mapAM2Signal(a *dto.Alertmanager, c *gin.Context) {
 	for _, element := range a.Alerts {
 		recipients := al.config.Signal.Recipients
 		message := fmt.Sprint("Alert ", element.Labels["alertname"], " is ", element.Status)
