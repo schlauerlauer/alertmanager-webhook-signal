@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -32,14 +31,6 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
-	r.GET("/-/reload", func(c *gin.Context) {
-		newConfig, err := config.NewConfig("./config.yaml")
-		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
-		}
-		cfg = newConfig
-	})
-
 	api := r.Group("/api")
 
 	api.POST(":version/:provider", alerts.Receive)
@@ -48,5 +39,5 @@ func main() {
 	})
 
 	fmt.Println("Starting server. Listening on port:", cfg.Config.Server.Port)
-	r.Run(":"+cfg.Config.Server.Port)
+	r.Run(":" + cfg.Config.Server.Port)
 }

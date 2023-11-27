@@ -15,7 +15,7 @@ import (
 )
 
 type Alert struct {
-	config		*config.ConfigData
+	config *config.ConfigData
 }
 
 func NewAlert(config *config.ConfigService) *Alert {
@@ -25,8 +25,8 @@ func NewAlert(config *config.ConfigService) *Alert {
 }
 
 const (
-	ProviderGrafana			string = "grafana"
-	ProviderAlertmanager	string = "alertmanaer"
+	ProviderGrafana      string = "grafana"
+	ProviderAlertmanager string = "alertmanaer"
 )
 
 func (al *Alert) Receive(c *gin.Context) {
@@ -122,9 +122,9 @@ func (al *Alert) mapAM2SignalDeprecated(a dto.Alertmanager, c *gin.Context) {
 			message += fmt.Sprintf("\nuri: %v", element.GeneratorURL)
 		}
 		signal := dto.SignalMessage{
-			Message: message,
-			Number: al.config.Signal.Number,
-			Recipients: recipients,
+			Message:     message,
+			Number:      al.config.Signal.Number,
+			Recipients:  recipients,
 			Attachments: []string{},
 		}
 		al.sendSignal(signal, c)
@@ -157,9 +157,9 @@ func (al *Alert) mapAM2Signal(a dto.Alertmanager, c *gin.Context) {
 			message += fmt.Sprintf("\nuri: %v", element.GeneratorURL)
 		}
 		signal := dto.SignalMessage{
-			Message: message,
-			Number: al.config.Signal.Number,
-			Recipients: recipients,
+			Message:     message,
+			Number:      al.config.Signal.Number,
+			Recipients:  recipients,
 			Attachments: []string{},
 		}
 		al.sendSignal(signal, c)
@@ -178,10 +178,10 @@ func (al *Alert) mapGrafana2Signal(ga dto.GrafanaAlert, c *gin.Context) {
 		ga.RuleUrl,
 	)
 	signal := dto.SignalMessage{
-		Message: message,
-		Number: al.config.Signal.Number,
-		Recipients: al.config.Signal.Recipients,
-		Attachments: []string{encoded,},
+		Message:     message,
+		Number:      al.config.Signal.Number,
+		Recipients:  al.config.Signal.Recipients,
+		Attachments: []string{encoded},
 	}
 	al.sendSignal(signal, c)
 }
