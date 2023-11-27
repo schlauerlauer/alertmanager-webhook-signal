@@ -4,16 +4,16 @@ server:
   port: 10000 # required
   debug: false
 signal:
-  number: 23456 # required
-  recipients: # required (default recipient, if anntations - recipients is not set in alert)
+  number: "+4923456" # the number you are sending messages from; required
+  recipients: # required (default recipient, if labels - recipients is not set in alert)
   - "+49123123123"
   send: http://127.0.0.1:10001/v2/send # required
 alertmanager:
-  ignoreLabels: # optional
-  - alertname
-  ignoreAnnotations: [] # optional
-  generatorURL: true # optional (default false)
-  matchLabel: recipients
+  ignoreLabels: # filter labels in the message; optional
+  - "alertname"
+  ignoreAnnotations: [] # filter annotations in the message; optional
+  generatorURL: true # include generator URL in the message; optional (default: false)
+  matchLabel: "recipients"
 recipients: # optional list of recipient names and numbers for label matching
   alice: "+49123123123"
   bob: "+49234234234"
