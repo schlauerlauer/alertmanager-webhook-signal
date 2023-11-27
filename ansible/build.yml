@@ -1,0 +1,7 @@
+---
+- name: "build"
+  become: false
+  roles:
+
+    - role: "./roles/build"
+      become: false
