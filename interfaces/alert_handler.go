@@ -26,7 +26,7 @@ func NewAlert(config *config.ConfigService) *Alert {
 
 const (
 	ProviderGrafana      string = "grafana"
-	ProviderAlertmanager string = "alertmanaer"
+	ProviderAlertmanager string = "alertmanager"
 )
 
 func (al *Alert) ReceiveV3(c *gin.Context) {

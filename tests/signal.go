@@ -32,7 +32,7 @@ func main() {
 func handleRequests() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/v2/send", receiveMessage).Methods("POST")
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, router))
 }
 
 func receiveMessage(w http.ResponseWriter, r *http.Request) {

@@ -35,20 +35,8 @@ docker run -d --rm --name alertmanager-signal \
 ### Test webhook
 
 ```bash
-curl -X POST localhost:10000/api/v2/alertmanager -d '{
-    "alerts": [
-        {
-            "status": "firing",
-            "labels": {
-                "alertname": "test"
-            },
-            "annotations": {
-                "message": "Test alert."
-            }
-        }
-    ]
-}
-'
+curl -X POST "localhost:10000/api/v3/alertmanager" -d @tests/alert.json
+curl -X POST "localhost:10000/api/v3/grafana" -d @tests/grafana.json
 ```
 
 ## Configuration
