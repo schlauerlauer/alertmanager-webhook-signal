@@ -1,5 +1,6 @@
 ---
 - name: "build"
+  hosts: "localhost"
   become: false
   roles:
 
