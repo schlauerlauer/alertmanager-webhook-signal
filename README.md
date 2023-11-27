@@ -95,7 +95,7 @@ route:
 receivers:
 - name: signal
   webhook_configs:
-    - url: 'http://10.88.0.1:10000/api/v2/alertmanager'
+    - url: 'http://10.88.0.1:10000/api/v3/alertmanager'
       send_resolved: true
 ```
 
