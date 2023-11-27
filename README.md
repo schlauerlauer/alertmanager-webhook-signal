@@ -15,8 +15,6 @@ It now supports alert webhooks from Grafana aswell, including a preview graph im
 
 ## Run container
 
-> This image get's pushed automatically to `docker.io/schlauerlauer/alertmanager-webhook-signal` and `registry.gitlab.com/schlauerlauer/alertmanager-webhook-signal`
-
 Default config
 
 ```bash

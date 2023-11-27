@@ -11,6 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const appVersion = "3.0.0" // updated by bumpver
+
 func main() {
 	log.SetOutput(os.Stdout)
 
@@ -50,6 +52,6 @@ func main() {
 		})
 	}
 
-	fmt.Println("Starting server. Listening on port:", cfg.Config.Server.Port)
+	log.Println(fmt.Sprintf("Server (v%s) started. Listening on port %s", appVersion, cfg.Config.Server.Port))
 	r.Run(":" + cfg.Config.Server.Port)
 }
