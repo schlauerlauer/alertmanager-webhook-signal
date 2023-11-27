@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const appVersion = "3.0.0" // updated by bumpver
+const appVersion = "1.0.0" // updated by bumpver
 
 func main() {
 	log.SetOutput(os.Stdout)
