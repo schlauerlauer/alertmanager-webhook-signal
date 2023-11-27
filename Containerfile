@@ -1,4 +1,4 @@
-FROM docker.io/library/golang:1.16.15 AS builder
+FROM docker.io/library/golang:1.20.6-alpine3.18 AS builder
 WORKDIR /go/src/gitlab.com/schlauerlauer/alertmanager-webhook-signal/
 COPY go.mod go.sum main.go .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app ./

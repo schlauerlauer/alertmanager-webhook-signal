@@ -1,20 +1,19 @@
-# Alertmanager webhook url: /api/v2/alertmanager
-# Signal webhook url: /api/v2/signal
-# Reload this config with a GET request on: /-/reload
+# Alertmanager webhook url: /api/v3/alertmanager
+# Signal webhook url: /api/v3/signal
 server:
   port: 10000 # required
   debug: false
 signal:
   number: 23456 # required
   recipients: # required (default recipient, if anntations - recipients is not set in alert)
-  - 123123123
-  send: http://10.88.0.1:10001/v2/send # required
+  - "+49123123123"
+  send: http://127.0.0.1:10001/v2/send # required
 alertmanager:
   ignoreLabels: # optional
   - alertname
   ignoreAnnotations: [] # optional
   generatorURL: true # optional (default false)
   matchLabel: recipients
-recipients: # optional list of recipient names and numbers for annotation matching
-  name1: "123123123"
-  name2: "234234234"
+recipients: # optional list of recipient names and numbers for label matching
+  alice: "+49123123123"
+  bob: "+49234234234"

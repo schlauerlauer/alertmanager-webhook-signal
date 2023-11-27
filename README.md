@@ -5,6 +5,8 @@ and maps it to the [dockerized signal-cli](https://github.com/bbernhard/signal-c
 
 This is useful if you already have the [signal-cli from bbernhard](https://github.com/bbernhard/signal-cli-rest-api) running as a [Home-Assistant notifier](https://www.home-assistant.io/integrations/signal_messenger/) for example.
 
+Use a prometheus label `recipients` to specify where you want the signal message to be send
+
 It now supports alert webhooks from Grafana aswell, including a preview graph image!
 
 ![grafana](media/grafana.png)
@@ -12,8 +14,6 @@ It now supports alert webhooks from Grafana aswell, including a preview graph im
 ![alertmanager](media/alertmanager.jpg)
 
 ## Run container
-
-> This image get's pushed automatically to `docker.io/schlauerlauer/alertmanager-webhook-signal` and `registry.gitlab.com/schlauerlauer/alertmanager-webhook-signal`
 
 Default config
 
@@ -35,20 +35,8 @@ docker run -d --rm --name alertmanager-signal \
 ### Test webhook
 
 ```bash
-curl -X POST localhost:10000/api/v2/alertmanager -d '{
-    "alerts": [
-        {
-            "status": "firing",
-            "labels": {
-                "alertname": "test"
-            },
-            "annotations": {
-                "message": "Test alert."
-            }
-        }
-    ]
-}
-'
+curl -X POST "localhost:10000/api/v3/alertmanager" -d @tests/alert.json
+curl -X POST "localhost:10000/api/v3/grafana" -d @tests/grafana.json
 ```
 
 ## Configuration
