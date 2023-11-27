@@ -1,21 +1,22 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"encoding/json"
+
 	"github.com/gorilla/mux"
-	"io/ioutil"
 )
 
 var port = "10001"
 
 type Signal struct {
-	Attachments		[]string	`json:"base64_attachments"`
-	Message			string		`json:"message"`
-	Number			string		`json:"number"`
-	Recipients 		[]string	`json:"recipients"`
+	Attachments []string `json:"base64_attachments"`
+	Message     string   `json:"message"`
+	Number      string   `json:"number"`
+	Recipients  []string `json:"recipients"`
 }
 
 var Signals []Signal
@@ -29,9 +30,9 @@ func main() {
 }
 
 func handleRequests() {
-    router := mux.NewRouter().StrictSlash(true)
+	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/v2/send", receiveMessage).Methods("POST")
-    log.Fatal(http.ListenAndServe(":"+port, router))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
 func receiveMessage(w http.ResponseWriter, r *http.Request) {
