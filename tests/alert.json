@@ -5,7 +5,8 @@
         {
             "status": "firing",
             "labels": {
-                "alertname": "node_down"
+                "alertname": "node_down",
+                "recipients": "alice"
             },
             "annotations": {
                 "message": "testhost.local:9100 of job node has been down for more than 5 minutes."

@@ -2,9 +2,9 @@
 current_version = "3.0.0"
 version_pattern = "MAJOR.MINOR.PATCH[-TAGNUM]"
 commit_message = "bump version {old_version} -> {new_version}"
-commit = false
-tag = false
-push = false
+commit = true
+tag = true
+push = true
 pre_commit_hook = "bumpver_hook.sh"
 
 [bumpver.file_patterns]
