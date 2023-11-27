@@ -29,8 +29,7 @@ const (
 	ProviderAlertmanager string = "alertmanaer"
 )
 
-func (al *Alert) Receive(c *gin.Context) {
-	version := c.Param("version")
+func (al *Alert) ReceiveV3(c *gin.Context) {
 	provider := c.Param("provider")
 	buff, _ := io.ReadAll(c.Request.Body)
 
@@ -38,11 +37,28 @@ func (al *Alert) Receive(c *gin.Context) {
 	case ProviderAlertmanager:
 		var alert dto.Alertmanager
 		json.Unmarshal(buff, &alert)
-		if version == "v3" {
-			al.mapAM2Signal(alert, c)
-		} else {
-			al.mapAM2SignalDeprecated(alert, c)
-		}
+		al.mapAM2Signal(alert, c)
+		return
+	case ProviderGrafana:
+		var alert dto.GrafanaAlert
+		json.Unmarshal(buff, &alert)
+		al.mapGrafana2Signal(alert, c)
+		return
+	default:
+		c.AbortWithError(http.StatusNotFound, errors.New("provider not available"))
+		return
+	}
+}
+
+func (al *Alert) ReceiveV2(c *gin.Context) {
+	provider := c.Param("provider")
+	buff, _ := io.ReadAll(c.Request.Body)
+
+	switch provider {
+	case ProviderAlertmanager:
+		var alert dto.Alertmanager
+		json.Unmarshal(buff, &alert)
+		al.mapAM2SignalDeprecated(alert, c)
 		return
 	case ProviderGrafana:
 		var alert dto.GrafanaAlert
