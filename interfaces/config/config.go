@@ -2,7 +2,7 @@ package config
 
 import (
 	"encoding/json"
-	"log"
+	"log/slog"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -46,16 +46,16 @@ func NewConfig(configPath string) (*ConfigService, error) {
 
 	file, err := os.ReadFile(configPath)
 	if err != nil {
-		log.Println("error opening config file", configPath, err)
+		slog.Error("Error opening config file", "config_path", configPath, "err", err)
 		return nil, err
 	}
 
 	err = yaml.Unmarshal(file, &cfg)
 	if err != nil {
-		log.Println("error parsing yaml, trying json", err)
+		slog.Error("Error parsing yaml, trying json", "err", err)
 		err = json.Unmarshal([]byte(file), &cfg)
 		if err != nil {
-			log.Println("could not parse config yaml or json")
+			slog.Error("Could not parse config yaml or json", "err", err)
 			return nil, err
 		}
 	}

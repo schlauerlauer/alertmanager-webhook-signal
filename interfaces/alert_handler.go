@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -37,7 +37,7 @@ func (al *Alert) ReceiveAlertmanager(c *gin.Context) {
 	err := json.Unmarshal(buff, &alert)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, errors.New("could not unmarshal json"))
-		log.Println(err)
+		slog.Error("Error unmarshalling json", "err", err)
 		return
 	}
 
@@ -52,7 +52,7 @@ func (al *Alert) ReceiveGrafana(c *gin.Context) {
 	err := json.Unmarshal(buff, &alert)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, errors.New("could not unmarshal json"))
-		log.Println(err)
+		slog.Error("Error unmarshalling json", "err", err)
 		return
 	}
 

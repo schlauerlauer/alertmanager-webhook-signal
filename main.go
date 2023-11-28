@@ -4,8 +4,7 @@ import (
 	"alertmanager-webhook-signal/interfaces"
 	"alertmanager-webhook-signal/interfaces/config"
 	"errors"
-	"fmt"
-	"log"
+	"log/slog"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -14,8 +13,6 @@ import (
 const appVersion = "1.0.0" // updated by bumpver
 
 func main() {
-	log.SetOutput(os.Stdout)
-
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
 		configPath = "./config.yaml"
@@ -23,7 +20,8 @@ func main() {
 
 	cfg, err := config.NewConfig(configPath)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("Error reading config", "err", err)
+		os.Exit(1)
 	}
 
 	alerts := interfaces.NewAlert(
@@ -53,6 +51,6 @@ func main() {
 		})
 	}
 
-	log.Println(fmt.Sprintf("Server (v%s) started. Listening on port %s", appVersion, cfg.Config.Server.Port))
+	slog.Info("Server starting", "version", appVersion, "port", cfg.Config.Server.Port)
 	r.Run(":" + cfg.Config.Server.Port)
 }
