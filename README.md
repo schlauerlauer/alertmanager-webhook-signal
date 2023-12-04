@@ -1,11 +1,11 @@
 # Alertmanager Webhook Signal
 
-This project creates a little (dockerized) REST API Endpoint for an [Alertmanager webhook receiver](https://prometheus.io/docs/alerting/latest/configuration/#webhook_config)
-and maps it to the [dockerized signal-cli](https://github.com/bbernhard/signal-cli-rest-api).
+This project creates a containerized http endpoint which listens for requests by an [alertmanager webhook receiver](https://prometheus.io/docs/alerting/latest/configuration/#webhook_config)
+and maps it to the [signal-cli by bbernhard](https://github.com/bbernhard/signal-cli-rest-api).
 
-This is useful if you already have the [signal-cli from bbernhard](https://github.com/bbernhard/signal-cli-rest-api) running as a [Home-Assistant notifier](https://www.home-assistant.io/integrations/signal_messenger/) for example.
+This is useful if you already have the signal-cli running for example as a [home-assistant notifier](https://www.home-assistant.io/integrations/signal_messenger/).
 
-Use a prometheus label `recipients` to specify where you want the signal message to be send
+Use a prometheus label `recipients` to specify where you want the signal message to be send.
 
 It now supports alert webhooks from Grafana aswell, including a preview graph image!
 
@@ -15,21 +15,11 @@ It now supports alert webhooks from Grafana aswell, including a preview graph im
 
 ## Run container
 
-Default config
-
 ```bash
 docker run -d --rm --name alertmanager-signal \
   -p 10000:10000 \
-  docker.io/schlauerlauer/alertmanager-webhook-signal:latest
-```
-
-Custom config
-
-```bash
-docker run -d --rm --name alertmanager-signal \
-  -p 10000:10000 \
-  -v $(pwd)/config.yaml:/root/config.yaml \
-  docker.io/schlauerlauer/alertmanager-webhook-signal:latest
+  -v $(pwd)/config.yaml:/config.yaml \
+  docker.io/schlauerlauer/alertmanager-webhook-signal:1.0.1
 ```
 
 ## Configuration
@@ -42,13 +32,13 @@ Example configuration:
 # Alertmanager webhook url: /api/v3/alertmanager
 # Grafana webhook url: /api/v3/grafana
 server:
-  port: 10000 # required
+  port: 10000 # port this program listens on; required
   debug: false
 signal:
   number: "+4923456" # the number you are sending messages from; required
-  recipients: # required (default recipient, if labels - recipients is not set in alert)
+  recipients: # default recipient(s), if the recipients label is not set in alert; required
   - "+49123123123"
-  send: http://127.0.0.1:10001/v2/send # required
+  send: http://127.0.0.1:10001/v2/send # http endpoint of the signal-cli; required
 alertmanager:
   ignoreLabels: # filter labels in the message; optional
   - "alertname"
@@ -58,20 +48,6 @@ alertmanager:
 recipients: # optional list of recipient names and numbers for label matching
   alice: "+49123123123"
   bob: "+49234234234"
-```
-
-Example PrometheusRule:
-
-```yaml
-groups:
-- name: test.rules
-  rules:
-  - alert: Watchdog
-    annotations:
-      message: 'Testalert'
-      recipients: name1
-    expr: 'vector(1)'
-    for: 1m
 ```
 
 Example Alertmanager config.yml:
@@ -91,15 +67,3 @@ receivers:
       - url: "http://10.88.0.1:10000/api/v3/alertmanager"
         send_resolved: true
 ```
-
-Entry | Example | Explanation | Required
--|-|-|-
-server.port | 10000 | Port the script should listen on | yes
-signal.number | "+4912345678901" | Phone number of signal cli sender | yes
-signal.recipients | ["+4923456789012"] | Phone number(s) of the recipients | yes
-signal.send | "http://10.88.0.1:10001/v2/send" | http endpoint of the [signal cli](https://github.com/bbernhard/signal-cli-rest-api) | yes
-alertmanager.ignoreLabels | ["alertname"] | Name of label(s) not to include in the signal message | no
-alertmanager.ignoreAnnotations | ["message"] | Name of annotation(s) not to include in the signal message | no
-alertmanager.generatorURL | true | include prometheus generator link in signal message | no
-
-> Note: if there are errors in the config.yaml the app won't start.
