@@ -17,3 +17,6 @@ pre_commit_hook = "bumpver_hook.sh"
 "bumpver_hook.sh" = [
     '--tag {version}'
 ]
+"README.md" = [
+    'docker.io/schlauerlauer/alertmanager-webhook-signal:{version}'
+]
