@@ -50,6 +50,27 @@ recipients: # optional list of recipient names and numbers for label matching
   bob: "+49234234234"
 ```
 
+Example PrometheusRule:
+
+```yaml
+groups:
+  - name: "test.rules"
+    rules:
+      - alert: "Watchdog default recipient"
+        annotations:
+          message: "Testalert default recipient"
+        expr: 'vector(1)'
+        for: "1m"
+
+      - alert: "Watchdog named recipient"
+        annotations:
+          message: "Testalert named recipient"
+        labels:
+          recipients: "alice"
+        expr: 'vector(1)'
+        for: "1m"
+```
+
 Example Alertmanager config.yml:
 
 ```yaml
