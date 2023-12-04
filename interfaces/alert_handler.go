@@ -101,6 +101,7 @@ func (al *Alert) sendSignal(m dto.SignalMessage, c *gin.Context) {
 	res, e := client.Do(req)
 	if e != nil {
 		c.String(http.StatusInternalServerError, "could not reach signal api.")
+		slog.Error("could not reach signal api", "url", al.config.Signal.Send)
 		return
 	}
 	defer res.Body.Close()

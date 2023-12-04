@@ -32,13 +32,6 @@ docker run -d --rm --name alertmanager-signal \
   docker.io/schlauerlauer/alertmanager-webhook-signal:latest
 ```
 
-### Test webhook
-
-```bash
-curl -X POST "localhost:10000/api/v3/alertmanager" -d @tests/alert.json
-curl -X POST "localhost:10000/api/v3/grafana" -d @tests/grafana.json
-```
-
 ## Configuration
 
 A `config.yaml` file is needed for configuration.
