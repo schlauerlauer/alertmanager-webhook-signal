@@ -11,4 +11,4 @@ alerting:
   alertmanagers:
     - static_configs:
       - targets:
-          - "10.88.0.1:10004"
+          - "127.0.0.1:9093"
