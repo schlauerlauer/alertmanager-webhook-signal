@@ -104,22 +104,20 @@ func (al *Alert) sendSignal(m dto.SignalMessage, c *gin.Context) {
 		return
 	}
 	defer res.Body.Close()
-	fmt.Println("signal response:", res.Status)
+	slog.Info("message sent to signal-cli", "response", res.Status)
 }
 
-func getImage(url string, c *gin.Context) string {
+func getImage(url string) (string, error) {
 	resp, e := http.Get(url)
 	if e != nil {
-		c.String(http.StatusInternalServerError, "could not download grafana image.")
-		return ""
+		return "", errors.New("could not download grafana image")
 	}
 	defer resp.Body.Close()
 	b, e := io.ReadAll(resp.Body)
 	if e != nil {
-		c.String(http.StatusInternalServerError, "could not download grafana image.")
-		return ""
+		return "", errors.New("could not download grafana image")
 	}
-	return base64.StdEncoding.EncodeToString(b)
+	return base64.StdEncoding.EncodeToString(b), nil
 }
 
 // this is using annotations instead of labels for the recipients. Please use the newer mapAM2Signal, which uses labels
@@ -133,7 +131,6 @@ func (al *Alert) mapAM2SignalDeprecated(a dto.Alertmanager, c *gin.Context) {
 			}
 			if k == "recipients" {
 				newReceiver := al.mapReceiver(v.(string))
-				fmt.Println(newReceiver)
 				if newReceiver != "" {
 					recipients = nil
 					recipients = append(recipients, newReceiver)
@@ -152,7 +149,8 @@ func (al *Alert) mapAM2SignalDeprecated(a dto.Alertmanager, c *gin.Context) {
 			Message:     message,
 			Number:      al.config.Signal.Number,
 			Recipients:  recipients,
-			Attachments: []string{},
+			Attachments: nil,
+			TextMode:    "normal",
 		}
 		al.sendSignal(signal, c)
 	}
@@ -173,7 +171,6 @@ func (al *Alert) mapAM2Signal(a *dto.Alertmanager, c *gin.Context) {
 			}
 			if k == "recipients" {
 				newReceiver := al.mapReceiver(v.(string))
-				fmt.Println(newReceiver)
 				if newReceiver != "" {
 					recipients = nil
 					recipients = append(recipients, newReceiver)
@@ -187,17 +184,14 @@ func (al *Alert) mapAM2Signal(a *dto.Alertmanager, c *gin.Context) {
 			Message:     message,
 			Number:      al.config.Signal.Number,
 			Recipients:  recipients,
-			Attachments: []string{},
+			Attachments: nil,
+			TextMode:    "normal",
 		}
 		al.sendSignal(signal, c)
 	}
 }
 
 func (al *Alert) mapGrafana2Signal(ga dto.GrafanaAlert, c *gin.Context) {
-	var encoded string
-	if ga.ImageUrl != "" {
-		encoded = getImage(ga.ImageUrl, c)
-	}
 	message := fmt.Sprintf("%s\n%s\n%s\n%s",
 		ga.Title,
 		ga.RuleName,
@@ -208,7 +202,20 @@ func (al *Alert) mapGrafana2Signal(ga dto.GrafanaAlert, c *gin.Context) {
 		Message:     message,
 		Number:      al.config.Signal.Number,
 		Recipients:  al.config.Signal.Recipients,
-		Attachments: []string{encoded},
+		TextMode:    "normal",
+		Attachments: nil,
 	}
+
+	if ga.ImageUrl != "" {
+		attachment, err := getImage(ga.ImageUrl)
+		if err != nil {
+			slog.Warn("could not attach image to signal message", "err", err)
+		} else {
+			signal.Attachments = &[]string{
+				attachment,
+			}
+		}
+	}
+
 	al.sendSignal(signal, c)
 }

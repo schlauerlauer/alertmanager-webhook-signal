@@ -44,8 +44,20 @@ type GrafanaMatches struct {
 }
 
 type SignalMessage struct {
-	Attachments []string `json:"base64_attachments"`
-	Message     string   `json:"message"`
-	Number      string   `json:"number"`
-	Recipients  []string `json:"recipients"`
+	Attachments   *[]string       `json:"base64_attachments,omitempty"`
+	Mentions      []SignalMention `json:"mentions"`
+	Message       string          `json:"message"`
+	Number        string          `json:"number"`
+	QuoteAuthor   string          `json:"quote_author"`
+	QuoteMentions []SignalMention `json:"quote_mentions"`
+	QuoteMessage  string          `json:"quote_message"`
+	Recipients    []string        `json:"recipients"`
+	Sticker       string          `json:"sticker"`
+	TextMode      string          `json:"text_mode"`
+}
+
+type SignalMention struct {
+	Author string `json:"author"`
+	Length int    `json:"length"`
+	Start  int    `json:"start"`
 }
