@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const appVersion = "1.0.0" // updated by bumpver
+const appVersion = "1.0.1" // updated by bumpver
 
 func main() {
 	configPath := os.Getenv("CONFIG_PATH")
