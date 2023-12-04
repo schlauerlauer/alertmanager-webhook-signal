@@ -1,0 +1,6 @@
+---
+# tasks file for build
+
+- name: "test pipeline"
+  debug:
+    msg: "test pipeline"
