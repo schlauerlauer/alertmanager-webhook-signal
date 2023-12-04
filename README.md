@@ -40,7 +40,7 @@ Example configuration:
 
 ```yaml
 # Alertmanager webhook url: /api/v3/alertmanager
-# Signal webhook url: /api/v3/signal
+# Grafana webhook url: /api/v3/grafana
 server:
   port: 10000 # required
   debug: false
