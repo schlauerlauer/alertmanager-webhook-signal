@@ -1,4 +1,4 @@
-# Alertmanager Webhook Signal [![pipeline status](https://gitlab.com/schlauerlauer/alertmanager-webhook-signal/badges/main/pipeline.svg)](https://gitlab.com/schlauerlauer/alertmanager-webhook-signal/-/commits/main)
+# Alertmanager Webhook Signal
 
 This project creates a little (dockerized) REST API Endpoint for an [Alertmanager webhook receiver](https://prometheus.io/docs/alerting/latest/configuration/#webhook_config)
 and maps it to the [dockerized signal-cli](https://github.com/bbernhard/signal-cli-rest-api).
@@ -85,17 +85,18 @@ Example Alertmanager config.yml:
 
 ```yaml
 global:
+
 route:
-  receiver: signal
+  receiver: "signal"
   group_by: ["alertname"]
-  group_wait: 5s
-  group_interval: 5m
-  repeat_interval: 6d
+  group_wait: "5s"
+  group_interval: "5m"
+  repeat_interval: "3h"
 receivers:
-- name: signal
-  webhook_configs:
-    - url: 'http://10.88.0.1:10000/api/v3/alertmanager'
-      send_resolved: true
+  - name: "signal"
+    webhook_configs:
+      - url: "http://10.88.0.1:10000/api/v3/alertmanager"
+        send_resolved: true
 ```
 
 Entry | Example | Explanation | Required

@@ -1,0 +1,14 @@
+global:
+  scrape_interval: "1m"
+  evaluation_interval: "1m"
+
+scrape_configs:
+
+rule_files:
+  - "/etc/prometheus/rules/rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+      - targets:
+          - "10.88.0.1:10004"

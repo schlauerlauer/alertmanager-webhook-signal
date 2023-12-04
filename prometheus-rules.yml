@@ -1,0 +1,9 @@
+groups:
+- name: test.rules
+  rules:
+  - alert: Watchdog
+    annotations:
+      message: 'Testalert'
+      # recipients: name1
+    expr: 'vector(1)'
+    for: 1m
