@@ -8,35 +8,42 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type ConfigInterface interface {}
+type ConfigInterface interface{}
 
 type ConfigService struct {
-	Config	*ConfigData
+	Config *ConfigData
 }
 
 type ConfigData struct {
-	Signal				SignalConfig			`yaml:"signal"`
-	Server 				ServerConfig			`yaml:"server"`
-	AMConfig			AlertmanagerConfig		`yaml:"alertmanager"`
-	Recipients			map[string]interface{}	`yaml:"recipients"`
+	Signal     SignalConfig           `yaml:"signal"`
+	Server     ServerConfig           `yaml:"server"`
+	AMConfig   AlertmanagerConfig     `yaml:"alertmanager"`
+	Recipients map[string]interface{} `yaml:"recipients"`
+	Templates  TemplateConfig         `yaml:"templates"`
 }
 
 type SignalConfig struct {
-	Number				string					`yaml:"number"`
-	Recipients			[]string				`yaml:"recipients"`
-	Send				string					`yaml:"send"`
+	Number     string   `yaml:"number"`
+	Recipients []string `yaml:"recipients"`
+	Send       string   `yaml:"send"`
 }
 
 type ServerConfig struct {
-	Port				string					`yaml:"port"`
-	Debug				bool					`yaml:"debug"`
+	Interface string `yaml:"interface"`
+	Port      string `yaml:"port"`
+	Debug     bool   `yaml:"debug"`
 }
 
 type AlertmanagerConfig struct {
-	IgnoreLabels		[]string				`yaml:"ignoreLabels"`
-	IgnoreAnnotations	[]string				`yaml:"ignoreAnnotations"`
-	GeneratorURL		bool					`yaml:"generatorURL"`
-	MatchLabel			string					`yaml:"matchLabel"`
+	IgnoreLabels      []string `yaml:"ignoreLabels"`
+	IgnoreAnnotations []string `yaml:"ignoreAnnotations"`
+	GeneratorURL      bool     `yaml:"generatorURL"`
+	MatchLabel        string   `yaml:"matchLabel"`
+}
+
+type TemplateConfig struct {
+	Grafana      string `yaml:"grafana"`
+	Alertmanager string `yaml:"alertmanager"`
 }
 
 var _ ConfigInterface = &ConfigData{}
