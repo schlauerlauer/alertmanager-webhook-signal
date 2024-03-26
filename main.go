@@ -3,20 +3,16 @@ package main
 import (
 	"alertmanager-webhook-signal/interfaces"
 	"alertmanager-webhook-signal/interfaces/config"
-	"errors"
+	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
-
-	"github.com/gin-gonic/gin"
 )
 
 const appVersion = "1.0.1" // updated by bumpver
 
 func main() {
-	configPath := os.Getenv("CONFIG_PATH")
-	if configPath == "" {
-		configPath = "./config.yaml"
-	}
+	configPath := emptyStringDefault(os.Getenv("CONFIG_PATH"), ".config.yaml")
 
 	cfg, err := config.NewConfig(configPath)
 	if err != nil {
@@ -28,29 +24,33 @@ func main() {
 		cfg,
 	)
 
-	gin.SetMode(gin.ReleaseMode)
-	r := gin.Default()
+	mux := http.NewServeMux()
 
-	api := r.Group("/api")
+	mux.HandleFunc("GET /ping", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("pong"))
+	})
+	mux.HandleFunc("GET /version", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(appVersion))
+	})
 
-	v3 := api.Group("v3")
-	{
-		v3.POST("alertmanager", alerts.ReceiveAlertmanager)
-		v3.POST("grafana", alerts.ReceiveGrafana)
+	mux.HandleFunc("POST /api/v3/alertmanager", alerts.Alertmanager)
+	mux.HandleFunc("POST /api/v3/grafana", alerts.Grafana)
+
+	mux.HandleFunc("POST /api/v2/alert/alertmanager", alerts.AlertmanagerOld)
+	mux.HandleFunc("POST /api/v2/alert/grafana", alerts.Grafana)
+
+	listenInterface := emptyStringDefault(cfg.Config.Server.Interface, "0.0.0.0")
+	listenPort := emptyStringDefault(cfg.Config.Server.Port, "10000")
+	slog.Info("Server starting", "version", appVersion, "interface", listenInterface, "port", listenPort)
+	if err := http.ListenAndServe(fmt.Sprint(listenInterface, ":", cfg.Config.Server.Port), mux); err != nil {
+		slog.Error("error starting server", "err", err)
+		os.Exit(1)
 	}
+}
 
-	v2 := api.Group("v2")
-	{
-		v2.POST(":provider", alerts.ReceiveV2)
+func emptyStringDefault(str, def string) string {
+	if str == "" {
+		return def
 	}
-
-	v1 := api.Group("v1")
-	{
-		v1.POST("alert", func(c *gin.Context) {
-			c.AbortWithError(299, errors.New("this api version is deprecated. Please use \"/api/v3/alertmanager\" instead"))
-		})
-	}
-
-	slog.Info("Server starting", "version", appVersion, "port", cfg.Config.Server.Port)
-	r.Run(":" + cfg.Config.Server.Port)
+	return str
 }
