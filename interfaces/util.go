@@ -28,3 +28,10 @@ func getImage(url string) (string, error) {
 	}
 	return base64.StdEncoding.EncodeToString(body), nil
 }
+
+func ternary(condition bool, truthy string, falsy string) string {
+	if condition {
+		return truthy
+	}
+	return falsy
+}

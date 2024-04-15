@@ -9,6 +9,7 @@ signal:
   recipients: # required (default recipient, if labels - recipients is not set in alert)
     - "+49123123123"
   send: http://127.0.0.1:10001/v2/send # required
+  textmodeNormal: false # true = text mode "normal", false = text mode "styled"
 alertmanager:
   ignoreLabels: # filter labels in the message; optional
     - "alertname"
@@ -24,7 +25,7 @@ templates:
     {{ .Message }}
     {{ .RuleUrl }}
   alertmanager: |-
-    {{ if eq .Alert.Status "firing" }}❗{{ else }}✅{{ end }} Alert {{ .Alertname }} is {{ .Alert.Status }}
+    {{ if eq .Alert.Status "firing" }}❗{{ else }}✅{{ end }} Alert **{{ .Alertname }}** is {{ .Alert.Status }}
 
     {{- if gt (len (.Alert.Labels)) 0 }}
 
@@ -42,6 +43,6 @@ templates:
     {{- end }}
     {{- end }}
 
-    {{ if .Config.GeneratorURL -}}
+    {{- if .Config.GeneratorURL }}
     {{ .Alert.GeneratorURL}}
     {{ end -}}

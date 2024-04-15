@@ -113,7 +113,7 @@ func (al *Alert) grafanaToSignal(alert dto.GrafanaAlert) dto.SignalMessage {
 		Message:    message.String(),
 		Number:     al.config.Signal.Number,
 		Recipients: al.config.Signal.Recipients,
-		TextMode:   "normal",
+		TextMode:   ternary(al.config.Signal.TextModeNormal, "normal", "styled"),
 	}
 
 	if alert.ImageUrl != "" {
@@ -139,7 +139,7 @@ func (al *Alert) alertToSignal(alert dto.Alertmanager) []dto.SignalMessage {
 		if recipients, ok := alertElement.Labels["recipients"]; ok {
 			newReceiver, ok := al.config.Recipients[recipients.(string)]
 			if ok {
-				customRecipients = append(customRecipients, newReceiver.(string))
+				customRecipients = append(customRecipients, newReceiver)
 			}
 		}
 
@@ -167,7 +167,7 @@ func (al *Alert) alertToSignal(alert dto.Alertmanager) []dto.SignalMessage {
 			Number:      al.config.Signal.Number,
 			Recipients:  al.config.Signal.Recipients,
 			Attachments: nil,
-			TextMode:    "normal",
+			TextMode:    ternary(al.config.Signal.TextModeNormal, "normal", "styled"),
 		}
 		if len(customRecipients) > 0 {
 			newMesage.Recipients = customRecipients

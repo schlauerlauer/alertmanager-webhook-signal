@@ -29,7 +29,7 @@ func main() {
 {{ .Message }}
 {{ .RuleUrl }}`
 
-	const defaultAlertmanageTemplate = `{{ if eq .Alert.Status "firing" }}❗{{ else }}✅{{ end }} Alert {{ .Alertname }} is {{ .Alert.Status }}
+	const defaultAlertmanageTemplate = `{{ if eq .Alert.Status "firing" }}❗{{ else }}✅{{ end }} Alert **{{ .Alertname }}** is {{ .Alert.Status }}
 
 {{- if gt (len (.Alert.Labels)) 0 }}
 
@@ -47,7 +47,7 @@ Annotations:
 {{- end }}
 {{- end }}
 
-{{ if .Config.GeneratorURL -}}
+{{- if .Config.GeneratorURL }}
 {{ .Alert.GeneratorURL}}
 {{ end -}}
 `

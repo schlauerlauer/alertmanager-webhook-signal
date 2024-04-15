@@ -1,8 +1,0 @@
----
-- name: "build"
-  hosts: "localhost"
-  become: false
-  roles:
-
-    - role: "./roles/build"
-      become: false
