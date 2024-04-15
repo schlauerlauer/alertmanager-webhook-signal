@@ -11,7 +11,7 @@ It now supports alert webhooks from Grafana aswell, including a preview graph im
 
 ![grafana](media/grafana.png)
 
-![alertmanager](media/alertmanager.jpg)
+![alertmanager](media/alertmanager.png)
 
 ## Run container
 
