@@ -1,5 +1,5 @@
 [bumpver]
-current_version = "1.0.1"
+current_version = "1.1.0"
 version_pattern = "MAJOR.MINOR.PATCH[-TAGNUM]"
 commit_message = "bump version {old_version} -> {new_version}"
 commit = true
@@ -9,14 +9,17 @@ pre_commit_hook = "bumpver_hook.sh"
 
 [bumpver.file_patterns]
 "bumpver.toml" = [
-    'current_version = "{version}"',
+    'current_version = "{ version }"',
 ]
 "main.go" = [
-    'const appVersion = "{version}" // updated by bumpver',
+    'const appVersion = "{ version }" // updated by bumpver',
 ]
 "bumpver_hook.sh" = [
-    '--tag {version}'
+    '--tag { version }'
 ]
 "README.md" = [
-    'docker.io/schlauerlauer/alertmanager-webhook-signal:{version}'
+    'docker.io/schlauerlauer/alertmanager-webhook-signal:{ version }'
+]
+"Justfile" = [
+    'VERSION := "{ version }" # updated by bumpver'
 ]

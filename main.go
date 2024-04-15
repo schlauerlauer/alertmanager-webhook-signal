@@ -14,7 +14,7 @@ import (
 	"github.com/lmittmann/tint"
 )
 
-const appVersion = "1.0.1" // updated by bumpver
+const appVersion = "1.1.0" // updated by bumpver
 
 func main() {
 	slog.SetDefault(slog.New(
