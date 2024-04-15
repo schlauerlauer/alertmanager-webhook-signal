@@ -49,6 +49,7 @@ signal_exec:
 build:
 	@podman build \
 		-t docker.io/schlauerlauer/alertmanager-webhook-signal:{{ VERSION }} \
+		-t docker.io/schlauerlauer/alertmanager-webhook-signal:latest \
 		-f ./Containerfile
 
 alertmanager-webhook-signal:
