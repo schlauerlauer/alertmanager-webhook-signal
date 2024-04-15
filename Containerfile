@@ -1,7 +1,7 @@
 ############################
 # STEP 1 prepare binary and base data
 ############################
-FROM docker.io/library/golang:1.21-alpine AS builder
+FROM docker.io/library/golang:1.22.1-alpine3.19 AS builder
 ARG USER=appuser
 ARG UID=10001
 ARG GO_FILES=.

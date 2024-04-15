@@ -1,19 +1,47 @@
 # Alertmanager webhook url: /api/v3/alertmanager
 # Grafana webhook url: /api/v3/grafana
 server:
-  port: 10000 # required
+  port: 10000
   debug: false
+  interface: "0.0.0.0"
 signal:
   number: "+4923456" # the number you are sending messages from; required
   recipients: # required (default recipient, if labels - recipients is not set in alert)
-  - "+49123123123"
+    - "+49123123123"
   send: http://127.0.0.1:10001/v2/send # required
 alertmanager:
   ignoreLabels: # filter labels in the message; optional
-  - "alertname"
+    - "alertname"
   ignoreAnnotations: [] # filter annotations in the message; optional
   generatorURL: true # include generator URL in the message; optional (default: false)
-  matchLabel: "recipients"
 recipients: # optional list of recipient names and numbers for label matching
   alice: "+49123123123"
   bob: "+49234234234"
+templates:
+  grafana: |-
+    {{ if eq .State "alerting" }}❗{{ else }}✅{{ end }} {{ .Title}}
+    {{ .RuleName }}
+    {{ .Message }}
+    {{ .RuleUrl }}
+  alertmanager: |-
+    {{ if eq .Alert.Status "firing" }}❗{{ else }}✅{{ end }} Alert {{ .Alertname }} is {{ .Alert.Status }}
+
+    {{- if gt (len (.Alert.Labels)) 0 }}
+
+    Labels:
+    {{- range $key, $value := .Alert.Labels }}
+      - {{ $key }}: {{ $value }}
+    {{- end }}
+    {{- end }}
+
+    {{- if gt (len (.Alert.Annotations)) 0 }}
+
+    Annotations:
+    {{- range $key, $value := .Alert.Annotations }}
+      - {{ $key }}: {{ $value }}
+    {{- end }}
+    {{- end }}
+
+    {{ if .Config.GeneratorURL -}}
+    {{ .Alert.GeneratorURL}}
+    {{ end -}}

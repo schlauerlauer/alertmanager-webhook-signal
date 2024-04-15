@@ -1,3 +1,2 @@
-app
-signal
-custom-config.yml
+/custom-config.yaml
+/tmp/
