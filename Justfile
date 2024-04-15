@@ -1,15 +1,18 @@
 # setup containers for development
 
+default:
+	CONFIG_PATH=./custom-config.yaml air
+
 pod:
+	# 10001 = signal-cli
 	# 10003 = prometheus
 	# 10004 = alertmanager
 	# 10005 = grafana
-	# 10006 = signal-cli
 	podman pod create --name aws-pod --infra-name aws-infra \
+		-p 127.0.0.1:10001:8080 \
 		-p 127.0.0.1:10003:9090 \
 		-p 127.0.0.1:10004:9093 \
-		-p 127.0.0.1:10005:3000 \
-		-p 127.0.0.1:10006:8080
+		-p 127.0.0.1:10005:3000
 
 grafana:
 	podman run -d --name aws-grafana \
@@ -46,7 +49,6 @@ alertmanager-webhook-signal:
 		--pod aws-pod \
 		-v "$(pwd)/custom-config.yml:/config.yaml:ro,Z" \
 		docker.io/schlauerlauer/alertmanager-webhook-signal:1.0.1
-
 
 ## LINK DEVICE
 # just signal_exec

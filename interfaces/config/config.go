@@ -38,7 +38,6 @@ type AlertmanagerConfig struct {
 	IgnoreLabels      []string `yaml:"ignoreLabels"`
 	IgnoreAnnotations []string `yaml:"ignoreAnnotations"`
 	GeneratorURL      bool     `yaml:"generatorURL"`
-	MatchLabel        string   `yaml:"matchLabel"`
 }
 
 type TemplateConfig struct {

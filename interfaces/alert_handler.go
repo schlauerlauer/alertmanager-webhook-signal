@@ -4,211 +4,120 @@ import (
 	"alertmanager-webhook-signal/domain/dto"
 	"alertmanager-webhook-signal/interfaces/config"
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
+	"text/template"
 )
 
 type Alert struct {
-	config *config.ConfigData
+	config               *config.ConfigData
+	grafanaTemplate      *template.Template
+	alertmanagerTemplate *template.Template
 }
 
-func NewAlert(config *config.ConfigService) *Alert {
+type alertTemplateData struct {
+	Alertname   string
+	Alert       dto.AMAlert
+	Config      config.AlertmanagerConfig
+	Labels      map[string]interface{}
+	Annotations map[string]interface{}
+}
+
+func NewAlert(
+	config *config.ConfigService,
+	grafanaTemplate *template.Template,
+	alertmanagerTemplate *template.Template,
+) *Alert {
 	return &Alert{
-		config: config.Config,
+		config:               config.Config,
+		grafanaTemplate:      grafanaTemplate,
+		alertmanagerTemplate: alertmanagerTemplate,
 	}
 }
 
-const (
-	ProviderGrafana      string = "grafana"
-	ProviderAlertmanager string = "alertmanager"
-)
-
-func (al *Alert) ReceiveAlertmanager(c *gin.Context) {
-	buff, _ := io.ReadAll(c.Request.Body)
+func (al *Alert) Alertmanager(w http.ResponseWriter, req *http.Request) {
+	buff, _ := io.ReadAll(req.Body)
 
 	var alert dto.Alertmanager
 	err := json.Unmarshal(buff, &alert)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, errors.New("could not unmarshal json"))
-		slog.Error("Error unmarshalling json", "err", err)
+		w.WriteHeader(http.StatusBadRequest)
+		slog.Error("could not unmarshal json", "err", err)
 		return
 	}
 
-	al.mapAM2Signal(&alert, c)
-	return
+	messages := al.alertToSignal(alert)
+	for _, message := range messages {
+		if code, err := al.sendSignal(message); err != nil {
+			slog.Warn("error sending signal message", "err", err, "statusCode", code)
+		}
+	}
 }
 
-func (al *Alert) ReceiveGrafana(c *gin.Context) {
-	buff, _ := io.ReadAll(c.Request.Body)
+func (al *Alert) Grafana(w http.ResponseWriter, req *http.Request) {
+	buff, _ := io.ReadAll(req.Body)
 
 	var alert dto.GrafanaAlert
 	err := json.Unmarshal(buff, &alert)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, errors.New("could not unmarshal json"))
-		slog.Error("Error unmarshalling json", "err", err)
+		slog.Error("could not unmarshal json", "err", err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	al.mapGrafana2Signal(alert, c)
-	return
-}
-
-func (al *Alert) ReceiveV2(c *gin.Context) {
-	provider := c.Param("provider")
-	buff, _ := io.ReadAll(c.Request.Body)
-
-	switch provider {
-	case ProviderAlertmanager:
-		var alert dto.Alertmanager
-		json.Unmarshal(buff, &alert)
-		al.mapAM2SignalDeprecated(alert, c)
-		return
-	case ProviderGrafana:
-		var alert dto.GrafanaAlert
-		json.Unmarshal(buff, &alert)
-		al.mapGrafana2Signal(alert, c)
-		return
-	default:
-		c.AbortWithError(http.StatusNotFound, errors.New("provider not available"))
-		return
-	}
-}
-
-func (al *Alert) mapReceiver(receiver string) string {
-	for r := range al.config.Recipients {
-		if r == receiver {
-			return fmt.Sprintf("%v", al.config.Recipients[receiver])
+	message := al.grafanaToSignal(alert)
+	if code, err := al.sendSignal(message); err != nil {
+		slog.Warn("error sending signal message", "err", err, "code", code)
+		if code >= 100 {
+			w.WriteHeader(code)
 		}
 	}
-	return ""
 }
 
-func (al *Alert) sendSignal(m dto.SignalMessage, c *gin.Context) {
+func (al *Alert) sendSignal(message dto.SignalMessage) (int, error) {
 	payloadBuf := new(bytes.Buffer)
-	json.NewEncoder(payloadBuf).Encode(m)
+	json.NewEncoder(payloadBuf).Encode(message)
 	if al.config.Server.Debug {
-		fmt.Println(payloadBuf)
+		slog.Debug("payload", "message", payloadBuf)
 	}
 	req, _ := http.NewRequest("POST", al.config.Signal.Send, payloadBuf)
 	client := &http.Client{}
-	res, e := client.Do(req)
-	if e != nil {
-		c.String(http.StatusInternalServerError, "could not reach signal api.")
-		slog.Error("could not reach signal api", "url", al.config.Signal.Send)
-		return
+	res, err := client.Do(req)
+	if err != nil {
+		return 400, errors.New("could not reach signal api")
 	}
 	defer res.Body.Close()
-	slog.Info("message sent to signal-cli", "response", res.Status)
+
+	if res.StatusCode >= 400 {
+		body, err := io.ReadAll(res.Body)
+		if err == nil {
+			slog.Warn("response", "body", string(body))
+		}
+		return res.StatusCode, errors.New("message was not successful")
+	}
+
+	return http.StatusOK, nil
 }
 
-func getImage(url string) (string, error) {
-	resp, e := http.Get(url)
-	if e != nil {
-		return "", errors.New("could not download grafana image")
+func (al *Alert) grafanaToSignal(alert dto.GrafanaAlert) dto.SignalMessage {
+	var message bytes.Buffer
+	err := al.grafanaTemplate.Execute(&message, alert)
+	if err != nil {
+		slog.Error("could not execute grafana message template", "err", err)
 	}
-	defer resp.Body.Close()
-	b, e := io.ReadAll(resp.Body)
-	if e != nil {
-		return "", errors.New("could not download grafana image")
-	}
-	return base64.StdEncoding.EncodeToString(b), nil
-}
 
-// this is using annotations instead of labels for the recipients. Please use the newer mapAM2Signal, which uses labels
-func (al *Alert) mapAM2SignalDeprecated(a dto.Alertmanager, c *gin.Context) {
-	for _, element := range a.Alerts {
-		recipients := al.config.Signal.Recipients
-		message := fmt.Sprint("Alert ", element.Labels["alertname"], " is ", element.Status)
-		for k, v := range element.Annotations {
-			if !stringInSlice(k, al.config.AMConfig.IgnoreAnnotations) {
-				message += fmt.Sprintf("\n%v: %v", k, v)
-			}
-			if k == "recipients" {
-				newReceiver := al.mapReceiver(v.(string))
-				if newReceiver != "" {
-					recipients = nil
-					recipients = append(recipients, newReceiver)
-				}
-			}
-		}
-		for k, v := range element.Labels {
-			if !stringInSlice(k, al.config.AMConfig.IgnoreLabels) {
-				message += fmt.Sprintf("\n%v: %v", k, v)
-			}
-		}
-		if al.config.AMConfig.GeneratorURL {
-			message += fmt.Sprintf("\nuri: %v", element.GeneratorURL)
-		}
-		signal := dto.SignalMessage{
-			Message:     message,
-			Number:      al.config.Signal.Number,
-			Recipients:  recipients,
-			Attachments: nil,
-			TextMode:    "normal",
-		}
-		al.sendSignal(signal, c)
-	}
-}
-
-func (al *Alert) mapAM2Signal(a *dto.Alertmanager, c *gin.Context) {
-	for _, element := range a.Alerts {
-		recipients := al.config.Signal.Recipients
-		message := fmt.Sprint("Alert ", element.Labels["alertname"], " is ", element.Status)
-		for k, v := range element.Annotations {
-			if !stringInSlice(k, al.config.AMConfig.IgnoreAnnotations) {
-				message += fmt.Sprintf("\n%v: %v", k, v)
-			}
-		}
-		for k, v := range element.Labels {
-			if !stringInSlice(k, al.config.AMConfig.IgnoreLabels) {
-				message += fmt.Sprintf("\n%v: %v", k, v)
-			}
-			if k == "recipients" {
-				newReceiver := al.mapReceiver(v.(string))
-				if newReceiver != "" {
-					recipients = nil
-					recipients = append(recipients, newReceiver)
-				}
-			}
-		}
-		if al.config.AMConfig.GeneratorURL {
-			message += fmt.Sprintf("\nuri: %v", element.GeneratorURL)
-		}
-		signal := dto.SignalMessage{
-			Message:     message,
-			Number:      al.config.Signal.Number,
-			Recipients:  recipients,
-			Attachments: nil,
-			TextMode:    "normal",
-		}
-		al.sendSignal(signal, c)
-	}
-}
-
-func (al *Alert) mapGrafana2Signal(ga dto.GrafanaAlert, c *gin.Context) {
-	message := fmt.Sprintf("%s\n%s\n%s\n%s",
-		ga.Title,
-		ga.RuleName,
-		ga.Message,
-		ga.RuleUrl,
-	)
 	signal := dto.SignalMessage{
-		Message:     message,
-		Number:      al.config.Signal.Number,
-		Recipients:  al.config.Signal.Recipients,
-		TextMode:    "normal",
-		Attachments: nil,
+		Message:    message.String(),
+		Number:     al.config.Signal.Number,
+		Recipients: al.config.Signal.Recipients,
+		TextMode:   "normal",
 	}
 
-	if ga.ImageUrl != "" {
-		attachment, err := getImage(ga.ImageUrl)
+	if alert.ImageUrl != "" {
+		attachment, err := getImage(alert.ImageUrl)
 		if err != nil {
 			slog.Warn("could not attach image to signal message", "err", err)
 		} else {
@@ -218,5 +127,54 @@ func (al *Alert) mapGrafana2Signal(ga dto.GrafanaAlert, c *gin.Context) {
 		}
 	}
 
-	al.sendSignal(signal, c)
+	return signal
+}
+
+func (al *Alert) alertToSignal(alert dto.Alertmanager) []dto.SignalMessage {
+	messages := make([]dto.SignalMessage, len(alert.Alerts))
+	for idx, alertElement := range alert.Alerts {
+		customRecipients := []string{}
+		alertName := alertElement.Labels["alertname"].(string)
+
+		if recipients, ok := alertElement.Labels["recipients"]; ok {
+			newReceiver, ok := al.config.Recipients[recipients.(string)]
+			if ok {
+				customRecipients = append(customRecipients, newReceiver.(string))
+			}
+		}
+
+		for _, annotation := range al.config.AMConfig.IgnoreAnnotations {
+			delete(alertElement.Annotations, annotation)
+		}
+		for _, label := range al.config.AMConfig.IgnoreLabels {
+			delete(alertElement.Labels, label)
+		}
+
+		var message bytes.Buffer
+		err := al.alertmanagerTemplate.Execute(&message, alertTemplateData{
+			Alertname:   alertName,
+			Alert:       alertElement,
+			Config:      al.config.AMConfig,
+			Labels:      alertElement.Labels,
+			Annotations: alertElement.Annotations,
+		})
+		if err != nil {
+			slog.Error("could not execute alertmanager message template", "err", err)
+		}
+
+		newMesage := dto.SignalMessage{
+			Message:     message.String(),
+			Number:      al.config.Signal.Number,
+			Recipients:  al.config.Signal.Recipients,
+			Attachments: nil,
+			TextMode:    "normal",
+		}
+		if len(customRecipients) > 0 {
+			newMesage.Recipients = customRecipients
+		}
+
+		messages[idx] = newMesage
+	}
+
+	return messages
 }

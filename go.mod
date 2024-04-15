@@ -2,7 +2,10 @@ module alertmanager-webhook-signal
 
 go 1.22
 
-require gopkg.in/yaml.v3 v3.0.1
+require (
+	github.com/lmittmann/tint v1.0.4
+	gopkg.in/yaml.v3 v3.0.1
+)
 
 require (
 	github.com/kr/pretty v0.3.0 // indirect
