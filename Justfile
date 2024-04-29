@@ -1,4 +1,4 @@
-VERSION := "1.1.0" # updated by bumpver
+VERSION := "1.1.1" # updated by bumpver
 
 default:
 	CONFIG_PATH=./custom-config.yaml air

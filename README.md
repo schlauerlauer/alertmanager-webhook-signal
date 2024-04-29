@@ -23,7 +23,7 @@ It now supports alert webhooks from Grafana aswell, including a preview graph im
 docker run -d --name alertmanager-signal \
   -p 10000:10000 \
   -v $(pwd)/config.yaml:/config.yaml \
-  docker.io/schlauerlauer/alertmanager-webhook-signal:1.1.0
+  docker.io/schlauerlauer/alertmanager-webhook-signal:1.1.1
 ```
 
 ## Configuration
