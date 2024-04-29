@@ -9,10 +9,10 @@ pre_commit_hook = "bumpver_hook.sh"
 
 [bumpver.file_patterns]
 "bumpver.toml" = [
-    'current_version = "{ version }"',
+    'current_version = "{ version }"'
 ]
 "main.go" = [
-    'const appVersion = "{ version }" // updated by bumpver',
+    'const appVersion = "{ version }" // updated by bumpver'
 ]
 "bumpver_hook.sh" = [
     '--tag { version }'
