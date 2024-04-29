@@ -9,17 +9,17 @@ pre_commit_hook = "bumpver_hook.sh"
 
 [bumpver.file_patterns]
 "bumpver.toml" = [
-    'current_version = "{ version }"'
+    'current_version = "{version}"'
 ]
 "main.go" = [
-    'const appVersion = "{ version }" // updated by bumpver'
+    'const appVersion = "{version}" // updated by bumpver'
 ]
 "bumpver_hook.sh" = [
-    '--tag { version }'
+    '--tag {version}'
 ]
 "README.md" = [
-    'docker.io/schlauerlauer/alertmanager-webhook-signal:{ version }'
+    'docker.io/schlauerlauer/alertmanager-webhook-signal:{version}'
 ]
 "Justfile" = [
-    'VERSION := "{ version }" # updated by bumpver'
+    'VERSION := "{version}" # updated by bumpver'
 ]
