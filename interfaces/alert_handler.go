@@ -5,7 +5,7 @@ import (
 	"alertmanager-webhook-signal/interfaces/config"
 	"bytes"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -87,7 +87,7 @@ func (al *Alert) sendSignal(message dto.SignalMessage) (int, error) {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		return 400, errors.New("could not reach signal api")
+		return 400, fmt.Errorf("error sending signal message, err: %s", err)
 	}
 	defer res.Body.Close()
 
@@ -96,7 +96,7 @@ func (al *Alert) sendSignal(message dto.SignalMessage) (int, error) {
 		if err == nil {
 			slog.Warn("response", "body", string(body))
 		}
-		return res.StatusCode, errors.New("message was not successful")
+		return res.StatusCode, fmt.Errorf("error sending signal message, err: %s", err)
 	}
 
 	return http.StatusOK, nil
