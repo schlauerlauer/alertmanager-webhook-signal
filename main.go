@@ -52,7 +52,7 @@ Annotations:
 {{ end -}}
 `
 
-	configPath := emptyStringDefault(os.Getenv("CONFIG_PATH"), "./config.yaml")
+	configPath := emptyStringDefault(os.Getenv("CONFIG_PATH"), "/config.yaml")
 
 	cfg, err := config.NewConfig(configPath)
 	if err != nil {

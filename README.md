@@ -1,5 +1,9 @@
 # Alertmanager Webhook Signal
 
+> Note: The default config path is now /config.yaml
+>
+> If you want to override the config location, set the CONFIG_PATH environment variable
+
 This project creates a containerized http endpoint which listens for requests by an [alertmanager webhook receiver](https://prometheus.io/docs/alerting/latest/configuration/#webhook_config)
 and maps it to the [signal-cli by bbernhard](https://github.com/bbernhard/signal-cli-rest-api).
 
