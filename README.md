@@ -43,11 +43,11 @@ server:
 signal:
   number: "+4923456" # the number you are sending messages from; required
   recipients: # default recipient(s), if the recipients label is not set in alert; required
-  - "+49123123123"
+    - "+49123123123"
   send: http://127.0.0.1:10001/v2/send # http endpoint of the signal-cli; required
 alertmanager:
   ignoreLabels: # filter labels in the message; optional
-  - "alertname"
+    - "alertname"
   ignoreAnnotations: [] # filter annotations in the message; optional
   generatorURL: true # include generator URL in the message; optional (default: false)
   matchLabel: "recipients"
