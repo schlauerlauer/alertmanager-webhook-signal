@@ -51,6 +51,8 @@ FROM scratch
 ARG USER=appuser
 ARG UID=10001
 LABEL maintainer="schlauerlauer <github.com/schlauerlauer>"
+# Import CA certificates for CA trust
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # Import the user and group files from the builder.
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/group /etc/group
