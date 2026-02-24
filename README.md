@@ -1,9 +1,5 @@
 # Alertmanager Webhook Signal
 
-> Note: The default config path is now /config.yaml
->
-> If you want to override the config location, set the CONFIG_PATH environment variable
-
 This project creates a containerized http endpoint which listens for requests by an [alertmanager webhook receiver](https://prometheus.io/docs/alerting/latest/configuration/#webhook_config)
 and maps it to the [signal-cli by bbernhard](https://github.com/bbernhard/signal-cli-rest-api).
 
@@ -17,12 +13,18 @@ It now supports alert webhooks from Grafana aswell, including a preview graph im
 
 ![alertmanager](media/alertmanager.png)
 
+## Prerequisites
+
+- A running and configured [Signal CLI](https://github.com/bbernhard/signal-cli-rest-api)
+- Alertmanager and/or Grafana
+
 ## Run container
 
 ```bash
 docker run -d --name alertmanager-signal \
   -p 10000:10000 \
   -v $(pwd)/config.yaml:/config.yaml \
+  -e CONFIG_PATH=/config.yaml \
   docker.io/schlauerlauer/alertmanager-webhook-signal:1.1.1
 ```
 
