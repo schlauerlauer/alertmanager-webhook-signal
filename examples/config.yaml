@@ -1,5 +1,5 @@
-# Alertmanager webhook url: /api/v3/alertmanager
-# Grafana webhook url: /api/v3/grafana
+# Alertmanager webhook url: POST /alertmanager
+# Grafana webhook url: POST /grafana
 server:
   port: 10000
   debug: false
