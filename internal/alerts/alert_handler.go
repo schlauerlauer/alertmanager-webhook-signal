@@ -1,8 +1,9 @@
-package interfaces
+package alerts
 
 import (
-	"alertmanager-webhook-signal/domain/dto"
-	"alertmanager-webhook-signal/interfaces/config"
+	"alertmanager-webhook-signal/internal/config"
+	"alertmanager-webhook-signal/internal/model"
+	"alertmanager-webhook-signal/internal/util"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -20,19 +21,19 @@ type Alert struct {
 
 type alertTemplateData struct {
 	Alertname   string
-	Alert       dto.AMAlert
+	Alert       model.AMAlert
 	Config      config.AlertmanagerConfig
-	Labels      map[string]interface{}
-	Annotations map[string]interface{}
+	Labels      map[string]any
+	Annotations map[string]any
 }
 
 func NewAlert(
-	config *config.ConfigService,
+	config *config.ConfigData,
 	grafanaTemplate *template.Template,
 	alertmanagerTemplate *template.Template,
 ) *Alert {
 	return &Alert{
-		config:               config.Config,
+		config:               config,
 		grafanaTemplate:      grafanaTemplate,
 		alertmanagerTemplate: alertmanagerTemplate,
 	}
@@ -41,7 +42,7 @@ func NewAlert(
 func (al *Alert) Alertmanager(w http.ResponseWriter, req *http.Request) {
 	buff, _ := io.ReadAll(req.Body)
 
-	var alert dto.Alertmanager
+	var alert model.Alertmanager
 	err := json.Unmarshal(buff, &alert)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -60,7 +61,7 @@ func (al *Alert) Alertmanager(w http.ResponseWriter, req *http.Request) {
 func (al *Alert) Grafana(w http.ResponseWriter, req *http.Request) {
 	buff, _ := io.ReadAll(req.Body)
 
-	var alert dto.GrafanaAlert
+	var alert model.GrafanaAlert
 	err := json.Unmarshal(buff, &alert)
 	if err != nil {
 		slog.Error("could not unmarshal json", "err", err)
@@ -77,7 +78,7 @@ func (al *Alert) Grafana(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (al *Alert) sendSignal(message dto.SignalMessage) (int, error) {
+func (al *Alert) sendSignal(message model.SignalMessage) (int, error) {
 	payloadBuf := new(bytes.Buffer)
 	json.NewEncoder(payloadBuf).Encode(message)
 	if al.config.Server.Debug {
@@ -102,22 +103,22 @@ func (al *Alert) sendSignal(message dto.SignalMessage) (int, error) {
 	return http.StatusOK, nil
 }
 
-func (al *Alert) grafanaToSignal(alert dto.GrafanaAlert) dto.SignalMessage {
+func (al *Alert) grafanaToSignal(alert model.GrafanaAlert) model.SignalMessage {
 	var message bytes.Buffer
 	err := al.grafanaTemplate.Execute(&message, alert)
 	if err != nil {
 		slog.Error("could not execute grafana message template", "err", err)
 	}
 
-	signal := dto.SignalMessage{
+	signal := model.SignalMessage{
 		Message:    message.String(),
 		Number:     al.config.Signal.Number,
 		Recipients: al.config.Signal.Recipients,
-		TextMode:   ternary(al.config.Signal.TextModeNormal, "normal", "styled"),
+		TextMode:   util.Ternary(al.config.Signal.TextModeNormal, "normal", "styled"),
 	}
 
 	if alert.ImageUrl != "" {
-		attachment, err := getImage(alert.ImageUrl)
+		attachment, err := util.GetImage(alert.ImageUrl)
 		if err != nil {
 			slog.Warn("could not attach image to signal message", "err", err)
 		} else {
@@ -130,8 +131,8 @@ func (al *Alert) grafanaToSignal(alert dto.GrafanaAlert) dto.SignalMessage {
 	return signal
 }
 
-func (al *Alert) alertToSignal(alert dto.Alertmanager) []dto.SignalMessage {
-	messages := make([]dto.SignalMessage, len(alert.Alerts))
+func (al *Alert) alertToSignal(alert model.Alertmanager) []model.SignalMessage {
+	messages := make([]model.SignalMessage, len(alert.Alerts))
 	for idx, alertElement := range alert.Alerts {
 		customRecipients := []string{}
 		alertName := alertElement.Labels["alertname"].(string)
@@ -162,12 +163,12 @@ func (al *Alert) alertToSignal(alert dto.Alertmanager) []dto.SignalMessage {
 			slog.Error("could not execute alertmanager message template", "err", err)
 		}
 
-		newMesage := dto.SignalMessage{
+		newMesage := model.SignalMessage{
 			Message:     message.String(),
 			Number:      al.config.Signal.Number,
 			Recipients:  al.config.Signal.Recipients,
 			Attachments: nil,
-			TextMode:    ternary(al.config.Signal.TextModeNormal, "normal", "styled"),
+			TextMode:    util.Ternary(al.config.Signal.TextModeNormal, "normal", "styled"),
 		}
 		if len(customRecipients) > 0 {
 			newMesage.Recipients = customRecipients

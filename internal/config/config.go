@@ -4,14 +4,8 @@ import (
 	"log/slog"
 	"os"
 
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 )
-
-type ConfigInterface interface{}
-
-type ConfigService struct {
-	Config *ConfigData
-}
 
 type ConfigData struct {
 	Signal     SignalConfig       `yaml:"signal"`
@@ -45,10 +39,8 @@ type TemplateConfig struct {
 	Alertmanager string `yaml:"alertmanager"`
 }
 
-var _ ConfigInterface = &ConfigData{}
-
-func NewConfig(configPath string) (*ConfigService, error) {
-	var cfg *ConfigData
+func NewConfig(configPath string) (*ConfigData, error) {
+	var cfg ConfigData
 
 	file, err := os.ReadFile(configPath)
 	if err != nil {
@@ -59,9 +51,8 @@ func NewConfig(configPath string) (*ConfigService, error) {
 	err = yaml.Unmarshal(file, &cfg)
 	if err != nil {
 		slog.Error("Error parsing yaml, trying json", "err", err)
+		return nil, err
 	}
 
-	return &ConfigService{
-		Config: cfg,
-	}, nil
+	return &cfg, nil
 }

@@ -1,4 +1,4 @@
-package interfaces
+package util
 
 import (
 	"encoding/base64"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func stringInSlice(compare string, list []string) bool {
+func StringInSlice(compare string, list []string) bool {
 	for _, element := range list {
 		if element == compare {
 			return true
@@ -16,7 +16,7 @@ func stringInSlice(compare string, list []string) bool {
 	return false
 }
 
-func getImage(url string) (string, error) {
+func GetImage(url string) (string, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", errors.New("could not download grafana image")
@@ -29,9 +29,16 @@ func getImage(url string) (string, error) {
 	return base64.StdEncoding.EncodeToString(body), nil
 }
 
-func ternary(condition bool, truthy string, falsy string) string {
+func Ternary(condition bool, truthy string, falsy string) string {
 	if condition {
 		return truthy
 	}
 	return falsy
+}
+
+func StringDefault(str, def string) string {
+	if str == "" {
+		return def
+	}
+	return str
 }
