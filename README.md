@@ -30,11 +30,11 @@ docker run -d --name alertmanager-signal \
 
 A `config.yaml` file is needed for configuration.
 
+See `examples/config.yaml` for the full configuration file
+
 Example configuration:
 
 ```yaml
-# Alertmanager webhook url: POST /alertmanager
-# Grafana webhook url: POST /grafana
 server:
   port: 10000 # port this program listens on; required
   debug: false
@@ -52,34 +52,6 @@ alertmanager:
 recipients: # optional list of recipient names and numbers for label matching
   alice: "+49123123123"
   bob: "+49234234234"
-templates:
-  grafana: |-
-    {{ if eq .State "alerting" }}❗{{ else }}✅{{ end }} {{ .Title}}
-    {{ .RuleName }}
-    {{ .Message }}
-    {{ .RuleUrl }}
-  alertmanager: |-
-    {{ if eq .Alert.Status "firing" }}❗{{ else }}✅{{ end }} Alert {{ .Alertname }} is {{ .Alert.Status }}
-
-    {{- if gt (len (.Alert.Labels)) 0 }}
-
-    Labels:
-    {{- range $key, $value := .Alert.Labels }}
-      - {{ $key }}: {{ $value }}
-    {{- end }}
-    {{- end }}
-
-    {{- if gt (len (.Alert.Annotations)) 0 }}
-
-    Annotations:
-    {{- range $key, $value := .Alert.Annotations }}
-      - {{ $key }}: {{ $value }}
-    {{- end }}
-    {{- end }}
-
-    {{ if .Config.GeneratorURL -}}
-    {{ .Alert.GeneratorURL}}
-    {{ end -}}
 ```
 
 Example PrometheusRule:
