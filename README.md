@@ -72,7 +72,7 @@ groups:
         annotations:
           message: "Testalert named recipient"
         labels:
-          recipients: "alice"
+          recipients: "alice,bob"
         expr: 'vector(1)'
         for: "1m"
 ```

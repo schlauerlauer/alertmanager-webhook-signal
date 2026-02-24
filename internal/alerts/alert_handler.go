@@ -10,6 +10,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strings"
 	"text/template"
 )
 
@@ -132,15 +133,26 @@ func (al *Alert) grafanaToSignal(alert model.GrafanaAlert) model.SignalMessage {
 }
 
 func (al *Alert) alertToSignal(alert model.Alertmanager) []model.SignalMessage {
-	messages := make([]model.SignalMessage, len(alert.Alerts))
-	for idx, alertElement := range alert.Alerts {
+	var messages []model.SignalMessage
+
+	for _, alertElement := range alert.Alerts {
 		customRecipients := []string{}
+		seenRecipients := map[string]struct{}{}
 		alertName := alertElement.Labels["alertname"].(string)
 
 		if recipients, ok := alertElement.Labels["recipients"]; ok {
-			newReceiver, ok := al.config.Recipients[recipients.(string)]
-			if ok {
-				customRecipients = append(customRecipients, newReceiver)
+			for _, r := range strings.Split(recipients.(string), ",") {
+				name := strings.TrimSpace(r)
+				if name == "" {
+					continue
+				}
+
+				if newReceiver, ok := al.config.Recipients[name]; ok {
+					if _, seen := seenRecipients[newReceiver]; !seen {
+						customRecipients = append(customRecipients, newReceiver)
+						seenRecipients[newReceiver] = struct{}{}
+					}
+				}
 			}
 		}
 
@@ -163,18 +175,22 @@ func (al *Alert) alertToSignal(alert model.Alertmanager) []model.SignalMessage {
 			slog.Error("could not execute alertmanager message template", "err", err)
 		}
 
-		newMesage := model.SignalMessage{
-			Message:     message.String(),
-			Number:      al.config.Signal.Number,
-			Recipients:  al.config.Signal.Recipients,
-			Attachments: nil,
-			TextMode:    util.Ternary(al.config.Signal.TextModeNormal, "normal", "styled"),
-		}
+		// determine recipients
+		recipients := al.config.Signal.Recipients
 		if len(customRecipients) > 0 {
-			newMesage.Recipients = customRecipients
+			recipients = customRecipients
 		}
 
-		messages[idx] = newMesage
+		// 🔑 create ONE message per recipient
+		for _, recipient := range recipients {
+			messages = append(messages, model.SignalMessage{
+				Message:     message.String(),
+				Number:      al.config.Signal.Number,
+				Recipients:  []string{recipient},
+				Attachments: nil,
+				TextMode:    util.Ternary(al.config.Signal.TextModeNormal, "normal", "styled"),
+			})
+		}
 	}
 
 	return messages
