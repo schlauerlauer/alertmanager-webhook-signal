@@ -1,2 +1,5 @@
 /custom-config.yaml
 /tmp/
+
+# nix
+/result
