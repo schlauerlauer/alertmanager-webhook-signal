@@ -33,8 +33,8 @@ A `config.yaml` file is needed for configuration.
 Example configuration:
 
 ```yaml
-# Alertmanager webhook url: /api/v3/alertmanager
-# Grafana webhook url: /api/v3/grafana
+# Alertmanager webhook url: POST /alertmanager
+# Grafana webhook url: POST /grafana
 server:
   port: 10000 # port this program listens on; required
   debug: false
@@ -117,6 +117,6 @@ route:
 receivers:
   - name: "signal"
     webhook_configs:
-      - url: "http://127.0.0.1:10000/api/v3/alertmanager"
+      - url: "http://127.0.0.1:10000/alertmanager"
         send_resolved: true
 ```
