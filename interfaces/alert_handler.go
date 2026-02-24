@@ -3,6 +3,7 @@ package interfaces
 import (
 	"alertmanager-webhook-signal/domain/dto"
 	"alertmanager-webhook-signal/interfaces/config"
+	"strings"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -131,15 +132,26 @@ func (al *Alert) grafanaToSignal(alert dto.GrafanaAlert) dto.SignalMessage {
 }
 
 func (al *Alert) alertToSignal(alert dto.Alertmanager) []dto.SignalMessage {
-	messages := make([]dto.SignalMessage, len(alert.Alerts))
-	for idx, alertElement := range alert.Alerts {
+	var messages []dto.SignalMessage
+
+	for _, alertElement := range alert.Alerts {
 		customRecipients := []string{}
+		seenRecipients := map[string]struct{}{}
 		alertName := alertElement.Labels["alertname"].(string)
 
 		if recipients, ok := alertElement.Labels["recipients"]; ok {
-			newReceiver, ok := al.config.Recipients[recipients.(string)]
-			if ok {
-				customRecipients = append(customRecipients, newReceiver)
+			for _, r := range strings.Split(recipients.(string), ",") {
+				name := strings.TrimSpace(r)
+				if name == "" {
+					continue
+				}
+
+				if newReceiver, ok := al.config.Recipients[name]; ok {
+					if _, seen := seenRecipients[newReceiver]; !seen {
+						customRecipients = append(customRecipients, newReceiver)
+						seenRecipients[newReceiver] = struct{}{}
+					}
+				}
 			}
 		}
 
@@ -162,19 +174,24 @@ func (al *Alert) alertToSignal(alert dto.Alertmanager) []dto.SignalMessage {
 			slog.Error("could not execute alertmanager message template", "err", err)
 		}
 
-		newMesage := dto.SignalMessage{
-			Message:     message.String(),
-			Number:      al.config.Signal.Number,
-			Recipients:  al.config.Signal.Recipients,
-			Attachments: nil,
-			TextMode:    ternary(al.config.Signal.TextModeNormal, "normal", "styled"),
-		}
+		// determine recipients
+		recipients := al.config.Signal.Recipients
 		if len(customRecipients) > 0 {
-			newMesage.Recipients = customRecipients
+			recipients = customRecipients
 		}
 
-		messages[idx] = newMesage
+		// 🔑 create ONE message per recipient
+		for _, recipient := range recipients {
+			messages = append(messages, dto.SignalMessage{
+				Message:     message.String(),
+				Number:      al.config.Signal.Number,
+				Recipients:  []string{recipient},
+				Attachments: nil,
+				TextMode:    ternary(al.config.Signal.TextModeNormal, "normal", "styled"),
+			})
+		}
 	}
 
 	return messages
 }
+
